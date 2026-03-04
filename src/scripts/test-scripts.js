@@ -1,9 +1,4 @@
-import "../css/reset.css";
-import "../css/styles.css";
-import { projectManager } from "./project.js";
-
-// Run on page load
-
+// Projects
 (() => {
     // Should be rejected - Default Project
     projectManager.addProjectToManagerArray("Home");
