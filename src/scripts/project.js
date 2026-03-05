@@ -1,8 +1,9 @@
 // Technically I should be building from lowest (Atomic-To-Do) to highest Project
 // But let me get my feet wet and we can do it properly then
 
-// Project() is a function that creates and manipulates To-Do projects
+// This function creates and manipulates To-Do projects
 const project = () => {
+    // Private fields
     let projectId = "";
     let projectName = "";
 
@@ -32,13 +33,13 @@ const project = () => {
     return { createProject, changeProjectName, deleteProject, getProjectInfo };
 }
 
-// Create, fill, and manipulate an array of projects
+// This function serves as a manager function that creates, fills, and manipulates an array of projects
 const createProjectManager = () => {
-    // Create array to hold to-do projects
+    // Private array to hold to-do projects
     const projectManagerArray = [];
 
     // Helper Function - Checks if the project already exists
-    const alreadyInManagerArray = (newProjectName) => projectManagerArray.some(project => project.getProjectInfo().projectName === newProjectName);
+    const alreadyInManagerArray = (projectName) => projectManagerArray.some(project => project.getProjectInfo().projectName === projectName);
 
     const addProjectToManagerArray = (newProjectName) => {
         // Refuse addition if project already exists in project manager
@@ -71,6 +72,7 @@ const createProjectManager = () => {
             if (project.getProjectInfo().projectName === projectName) {
                 project.deleteProject();
                 projectManagerArray.splice(i, 1);
+                return;
             }
         }
     }
@@ -102,6 +104,7 @@ const createProjectManager = () => {
             const project = projectManagerArray[i];
             if (project.getProjectInfo().projectName === projectName) {
                 project.changeProjectName(newProjectName);
+                return;
             }
         }
     }
