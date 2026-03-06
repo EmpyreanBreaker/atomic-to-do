@@ -1,7 +1,7 @@
 // Technically I should be building from lowest (Atomic-To-Do) to highest Project
 // But let me get my feet wet and we can do it properly then
 
-// This function creates and manipulates To-Do projects
+// This function creates and manipulates project objects
 const project = () => {
     // Private fields
     let projectId = "";

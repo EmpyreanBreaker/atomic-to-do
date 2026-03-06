@@ -1,11 +1,12 @@
 // This function creates and manipulates atomic-to-do objects
+// FIX THE ATOMIC ID AFTER TODO CREATION
 const atomicToDo = () => {
     // Private fields
     let atomicId = ""; // Temporarily increments by itself for now
     let parentId = "";
     let description = "";
-    let status = "";
     let dueDate = "";
+    let status = "";
 
     const createAtomicToDo = (testAtomicId, newParentId, newDescription, newDueDate, newStatus = "incomplete") => {
         atomicId = testAtomicId;
@@ -15,19 +16,19 @@ const atomicToDo = () => {
         status = newStatus;
     }
 
-    const changeDescription = (newDescription) => {
+    const changeAtomicDescription = (newDescription) => {
         if (newDescription !== null || newDescription !== "") {
             description = newDescription;
         }
     }
 
-    const changeDueDate = (newDueDate) => {
+    const changeAtomicDueDate = (newDueDate) => {
         if (newDueDate !== null || newDueDate !== "") {
             dueDate = newDueDate;
         }
     }
 
-    const changeStatus = () => {
+    const changeAtomicStatus = () => {
         status === "incomplete" ? status = "completed" : status = "incomplete";
     }
 
@@ -42,7 +43,7 @@ const atomicToDo = () => {
     const getAtomicToDoInfo = () => {
         return { atomicId, parentId, description, dueDate, status }
     }
-    return { createAtomicToDo, changeDescription, changeDueDate, changeStatus, deleteAtomicToDo, getAtomicToDoInfo }
+    return { createAtomicToDo, changeAtomicDescription, changeAtomicDueDate, changeAtomicStatus, deleteAtomicToDo, getAtomicToDoInfo }
 }
 
 // This function serves as a manager function that creates, fills, and manipulates an array of atomic-to-do objects
@@ -53,7 +54,7 @@ const createAtomicToDoManager = () => {
     // Testing
     let testAtomicId = 0;
 
-    // Helper Function - Checks if the project already exists
+    // Helper Function - Checks if the project already exists in the array
     const alreadyInManagerArray = (atomicId) => atomicManagerArray.some(atomicToDo => atomicToDo.getAtomicToDoInfo().atomicId === atomicId);
 
     const addAtomicToDoToManagerArray = (newParentId, newDescription, newDueDate, newStatus) => {
@@ -73,7 +74,7 @@ const createAtomicToDoManager = () => {
         for (let i = 0; i < atomicManagerArray.length; i++) {
             const atomicToDo = atomicManagerArray[i];
             if (atomicToDo.getAtomicToDoInfo().atomicId === atomicId) {
-                atomicToDo.changeDescription(newDescription);
+                atomicToDo.changeAtomicDescription(newDescription);
                 return;
             }
         }
@@ -89,7 +90,7 @@ const createAtomicToDoManager = () => {
         for (let i = 0; i < atomicManagerArray.length; i++) {
             const atomicToDo = atomicManagerArray[i];
             if (atomicToDo.getAtomicToDoInfo().atomicId === atomicId) {
-                atomicToDo.changeDueDate(newDueDate);
+                atomicToDo.changeAtomicDueDate(newDueDate);
                 return;
             }
         }
@@ -105,7 +106,7 @@ const createAtomicToDoManager = () => {
         for (let i = 0; i < atomicManagerArray.length; i++) {
             const atomicToDo = atomicManagerArray[i];
             if (atomicToDo.getAtomicToDoInfo().atomicId === atomicId) {
-                atomicToDo.changeStatus();
+                atomicToDo.changeAtomicStatus();
                 return;
             }
         }
@@ -114,7 +115,7 @@ const createAtomicToDoManager = () => {
     const deleteAtomicToDoFromManagerArray = (atomicId) => {
         // Refuse deletion if the project does not exist in the project manager
         if (!alreadyInManagerArray(atomicId)) {
-            console.log(`Invalid Deletion - This is not an existing Atomic To-Do!`);
+            console.log(`Invalid deletion - This is not an existing Atomic To-Do!`);
             return;
         }
 
