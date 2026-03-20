@@ -1,6 +1,3 @@
-// Technically I should be building from lowest (Atomic-To-Do) to highest Project
-// But let me get my feet wet and we can do it properly then
-
 // This function creates and manipulates project objects
 const project = () => {
     // Private fields
@@ -48,7 +45,6 @@ const createProjectManager = () => {
             return;
         }
 
-        // Else
         const newProject = project();
         newProject.createProject(newProjectName);
         projectManagerArray.push(newProject);
@@ -75,6 +71,10 @@ const createProjectManager = () => {
                 return;
             }
         }
+    }
+
+    const createProjectManagerArrayDeepCopy = () => {
+        return projectManagerArray.map(project => structuredClone(project.getProjectInfo()));
     }
 
     const displayProjectsInManagerArray = () => {
@@ -109,7 +109,11 @@ const createProjectManager = () => {
         }
     }
 
-    return { addProjectToManagerArray, deleteProjectFromManagerArray, displayProjectsInManagerArray, renameProjectInManagerArray }
+    return {
+        addProjectToManagerArray, deleteProjectFromManagerArray,
+        createProjectManagerArrayDeepCopy, displayProjectsInManagerArray,
+        renameProjectInManagerArray
+    }
 }
 
 // Create one Project manager for the entire app

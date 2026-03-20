@@ -1,28 +1,6 @@
-// Project Manager
-(() => {
-    // Should be rejected - Default Project
-    projectManager.addProjectToManagerArray("Home");
-    projectManager.deleteProjectFromManagerArray("Home");
-    projectManager.renameProjectInManagerArray("Home", "Home");
-    // Valid Additions
-    projectManager.addProjectToManagerArray("Relationship");
-    projectManager.addProjectToManagerArray("School");
-    projectManager.addProjectToManagerArray("Work");
-    projectManager.displayProjectsInManagerArray();
-    // Valid Deletions
-    projectManager.deleteProjectFromManagerArray("Relationship");
-    projectManager.deleteProjectFromManagerArray("Work");
-    projectManager.displayProjectsInManagerArray();
-    // Invalid Deletions
-    projectManager.deleteProjectFromManagerArray("Relationship");
-    projectManager.deleteProjectFromManagerArray("Work");
-    // Valid Renames
-    projectManager.renameProjectInManagerArray("School", "Education");
-    projectManager.displayProjectsInManagerArray();
-    // Invalid Renames
-    projectManager.renameProjectInManagerArray("BadName", "GoodName");
-    projectManager.displayProjectsInManagerArray();
+import { projectManager } from "./project";
 
+(() => {
     // Atomic To-Do Manager
     atomicToDoManager.addAtomicToDoToManagerArray("School", "Read chapter 3 and take notes", "2026-03-06", "incomplete");
     atomicToDoManager.addAtomicToDoToManagerArray("School", "Submit assignment draft", "2026-03-08", "incomplete");
@@ -58,4 +36,12 @@
     parentToDoManager.changeParentTitleInManagerArray(4, "Undefined task")
     parentToDoManager.deleteParentToDoFromManagerArray(5);
     parentToDoManager.displayParentToDosInManagerArray();
+
+    // Project Manager
+    // Should be rejected - Default Project
+    projectManager.addProjectToManagerArray("Home");
+    projectManager.addProjectToManagerArray("Education");
+    projectManager.addProjectToManagerArray("Career")
+    projectManager.addProjectToManagerArray("Relationship");
+
 })()
