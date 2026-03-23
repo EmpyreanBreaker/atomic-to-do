@@ -17,6 +17,10 @@ const project = () => {
         projectName = newProjectName;
     }
 
+    const changeProjectId = (newProjectId) => {
+        projectId = newProjectId;
+    }
+
     const deleteProject = () => {
         projectId = null;
         projectName = null;
@@ -27,13 +31,15 @@ const project = () => {
     }
 
     // Use closure to interact with local variables
-    return { createProject, changeProjectName, deleteProject, getProjectInfo };
+    return { createProject, changeProjectName, changeProjectId, deleteProject, getProjectInfo };
 }
 
 // This function serves as a manager function that creates, fills, and manipulates an array of projects
 const createProjectManager = () => {
     // Private array to hold to-do projects
     const projectManagerArray = [];
+    // Private array that serves as a data snapshot
+    let projectManagerArrayDeepCopy = [];
 
     // Helper Function - Checks if the project already exists
     const alreadyInManagerArray = (projectName) => projectManagerArray.some(project => project.getProjectInfo().projectName === projectName);
@@ -48,6 +54,47 @@ const createProjectManager = () => {
         const newProject = project();
         newProject.createProject(newProjectName);
         projectManagerArray.push(newProject);
+
+        createProjectManagerArrayDeepCopy();
+    }
+
+    const addProjectFromLocalStorageToManagerArray = (newProjectId, newProjectName) => {
+        projectManagerArray.length = 0;
+        const newProject = project();
+        newProject.createProject(newProjectName);
+        newProject.changeProjectId(newProjectId);
+        projectManagerArray.push(newProject);
+
+        createProjectManagerArrayDeepCopy();
+    }
+
+    const changeProjectNameInManagerArray = (projectName, newProjectName) => {
+        // Refuse name change of default project
+        if (projectName === "Home") {
+            console.log(`Invalid name change - ${projectName} cannot be changed!`);
+            return;
+        }
+
+        // Refuse name change if project already exists in project manager
+        if (alreadyInManagerArray(newProjectName)) {
+            console.log(`Invalid name change - ${newProjectName} already exists!`);
+            return;
+        }
+
+        // Refuse name change if the project does not exist in project manager
+        if (!alreadyInManagerArray(projectName)) {
+            console.log(`Invalid name change - ${projectName} is not an existing project!`);
+            return;
+        }
+
+        for (let i = 0; i < projectManagerArray.length; i++) {
+            const project = projectManagerArray[i];
+            if (project.getProjectInfo().projectName === projectName) {
+                project.changeProjectName(newProjectName);
+                createProjectManagerArrayDeepCopy();
+                return;
+            }
+        }
     }
 
     const deleteProjectFromManagerArray = (projectName) => {
@@ -68,59 +115,34 @@ const createProjectManager = () => {
             if (project.getProjectInfo().projectName === projectName) {
                 project.deleteProject();
                 projectManagerArray.splice(i, 1);
+                createProjectManagerArrayDeepCopy();
                 return;
             }
         }
     }
 
     const createProjectManagerArrayDeepCopy = () => {
-        return projectManagerArray.map(project => structuredClone(project.getProjectInfo()));
+        projectManagerArrayDeepCopy = projectManagerArray.map(project => structuredClone(project.getProjectInfo()));
+        localStorage.setItem("toDoProjects", JSON.stringify(projectManagerArrayDeepCopy))
     }
 
     const displayProjectsInManagerArray = () => {
         console.table(projectManagerArray.map(project => project.getProjectInfo()));
     }
 
-    const renameProjectInManagerArray = (projectName, newProjectName) => {
-        // Refuse name change of default project
-        if (projectName === "Home") {
-            console.log(`Invalid Deletion - ${projectName} cannot be deleted!`);
-            return;
-        }
-
-        // Refuse name change if project already exists in project manager
-        if (alreadyInManagerArray(newProjectName)) {
-            console.log(`Invalid name change - ${newProjectName} already exists!`);
-            return;
-        }
-
-        // Refuse name change if the project does not exist in project manager
-        if (!alreadyInManagerArray(projectName)) {
-            console.log(`Invalid name change - ${projectName} is not an existing project!`);
-            return;
-        }
-
-        for (let i = 0; i < projectManagerArray.length; i++) {
-            const project = projectManagerArray[i];
-            if (project.getProjectInfo().projectName === projectName) {
-                project.changeProjectName(newProjectName);
-                return;
-            }
-        }
+    const displayProjectsInManagerArrayDeepCopy = () => {
+        console.table(projectManagerArrayDeepCopy);
     }
 
     return {
-        addProjectToManagerArray, deleteProjectFromManagerArray,
-        createProjectManagerArrayDeepCopy, displayProjectsInManagerArray,
-        renameProjectInManagerArray
+        addProjectToManagerArray, addProjectFromLocalStorageToManagerArray,
+        changeProjectNameInManagerArray, displayProjectsInManagerArrayDeepCopy,
+        deleteProjectFromManagerArray, displayProjectsInManagerArray
     }
 }
 
 // Create one Project manager for the entire app
 // Any import of this will use the same instance instead of separate instances
 const projectManager = createProjectManager();
-
-// Create default project
-projectManager.addProjectToManagerArray("Home");
 
 export { projectManager };

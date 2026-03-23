@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 // This function creates and manipulates atomic-to-do objects
 // FIX THE ATOMIC ID AFTER TODO CREATION
 const atomicToDo = () => {
@@ -147,4 +146,7 @@ const createAtomicToDoManager = () => {
 // Any import of this will use the same instance instead of separate instances
 const atomicToDoManager = createAtomicToDoManager();
 
+// I think I store the atomic Manager in storage and retrieve from storage
+// Then build like I did the displays
+// If atomicManager isn't present then store, if it is then populate from storage
 export { atomicToDoManager };
