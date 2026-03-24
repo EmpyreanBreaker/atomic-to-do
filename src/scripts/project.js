@@ -39,7 +39,7 @@ const createProjectManager = () => {
     // Private array to hold to-do projects
     const projectManagerArray = [];
     // Private array that serves as a data snapshot
-    let projectManagerArrayDeepCopy = [];
+    let projectManagerArraySnapshot = [];
 
     // Helper Function - Checks if the project already exists
     const alreadyInManagerArray = (projectName) => projectManagerArray.some(project => project.getProjectInfo().projectName === projectName);
@@ -55,17 +55,18 @@ const createProjectManager = () => {
         newProject.createProject(newProjectName);
         projectManagerArray.push(newProject);
 
-        createProjectManagerArrayDeepCopy();
+        createProjectManagerArraySnapshot();
     }
 
     const addProjectFromLocalStorageToManagerArray = (newProjectId, newProjectName) => {
-        projectManagerArray.length = 0;
+        if (alreadyInManagerArray(newProjectName)) {
+            console.log(`Invalid Addition - ${newProjectName} already exists!`);
+            return;
+        }
         const newProject = project();
         newProject.createProject(newProjectName);
         newProject.changeProjectId(newProjectId);
         projectManagerArray.push(newProject);
-
-        createProjectManagerArrayDeepCopy();
     }
 
     const changeProjectNameInManagerArray = (projectName, newProjectName) => {
@@ -91,10 +92,14 @@ const createProjectManager = () => {
             const project = projectManagerArray[i];
             if (project.getProjectInfo().projectName === projectName) {
                 project.changeProjectName(newProjectName);
-                createProjectManagerArrayDeepCopy();
+                createProjectManagerArraySnapshot();
                 return;
             }
         }
+    }
+
+    const clearProjectManagerArray = () => {
+        projectManagerArray.length = 0;
     }
 
     const deleteProjectFromManagerArray = (projectName) => {
@@ -115,28 +120,29 @@ const createProjectManager = () => {
             if (project.getProjectInfo().projectName === projectName) {
                 project.deleteProject();
                 projectManagerArray.splice(i, 1);
-                createProjectManagerArrayDeepCopy();
+                createProjectManagerArraySnapshot();
                 return;
             }
         }
     }
 
-    const createProjectManagerArrayDeepCopy = () => {
-        projectManagerArrayDeepCopy = projectManagerArray.map(project => structuredClone(project.getProjectInfo()));
-        localStorage.setItem("toDoProjects", JSON.stringify(projectManagerArrayDeepCopy))
+    const createProjectManagerArraySnapshot = () => {
+        projectManagerArraySnapshot = projectManagerArray.map(project => structuredClone(project.getProjectInfo()));
+        localStorage.setItem("toDoProjects", JSON.stringify(projectManagerArraySnapshot))
     }
 
     const displayProjectsInManagerArray = () => {
+        createProjectManagerArraySnapshot();
         console.table(projectManagerArray.map(project => project.getProjectInfo()));
     }
 
-    const displayProjectsInManagerArrayDeepCopy = () => {
-        console.table(projectManagerArrayDeepCopy);
+    const displayProjectsInManagerArraySnapshot = () => {
+        console.table(projectManagerArraySnapshot);
     }
 
     return {
         addProjectToManagerArray, addProjectFromLocalStorageToManagerArray,
-        changeProjectNameInManagerArray, displayProjectsInManagerArrayDeepCopy,
+        changeProjectNameInManagerArray, clearProjectManagerArray, displayProjectsInManagerArraySnapshot,
         deleteProjectFromManagerArray, displayProjectsInManagerArray
     }
 }
