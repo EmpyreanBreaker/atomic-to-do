@@ -8,9 +8,9 @@ const parentToDo = () => {
     let parentToDoStatus = "";
     let parentToDoDueDate = "";
 
-    const createParentToDo = (newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus = "incomplete") => {
+    const createNewParentToDo = (newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus = "incomplete") => {
         parentToDoProjectId = newParentToDoProjectId;
-        parentToDoId = newParentToDoId ?? crypto.randomUUID();
+        parentToDoId = crypto.randomUUID();
         parentToDoTitle = newParentToDoTitle;
         parentToDoDescription = newParentToDoDescription.trim();
         parentToDoDueDate = newParentToDoDueDate;
@@ -63,7 +63,8 @@ const parentToDo = () => {
     }
 
     return {
-        createParentToDo, changeParentToDoDescription,
+        createNewParentToDo,
+        changeParentToDoDescription,
         changeParentToDoDueDate, changeParentToDoId,
         changeParentToDoStatus, changeParentToDoTitle,
         deleteParentToDo, getParentToDoInfo
@@ -73,35 +74,33 @@ const parentToDo = () => {
 // This function serves as a manager function that creates, fills, and manipulates an array of parent-to-do objects
 const createparentToDoManager = () => {
     // Private array to hold atomic-to-do objects
-    const parentManagerArray = [];
-    let parentManagerArraySnapshot = [];
+    const parentToDoManagerArray = [];
+    let parentToDoManagerArraySnapshot = [];
 
     // Helper Function - Checks if the project already exists in the array
-    const alreadyInManagerArray = (parentToDoId) => parentManagerArray.some(parentToDo => parentToDo.getParentToDoInfo().parentToDoId === parentToDoId);
+    const alreadyInManagerArray = (parentToDoId) => parentToDoManagerArray.some(parentToDo => parentToDo.getParentToDoInfo().parentToDoId === parentToDoId);
 
-    const addParentToDoToManagerArray = (newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus) => {
+    // We don't need to be concerned about duplicates. People should be able to duplicate tasks
+    // The id will change automatically and they can write the same task title and description as needed
+    const addParentToDoToManagerArray = (newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus) => {
+        const newParentToDo = parentToDo();
+        newParentToDo.createNewParentToDo(newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus);
+        parentToDoManagerArray.push(newParentToDo);
+        createParentToDoManagerArraySnapshot();
+    }
+
+    // We do need to be concerned about duplicates here
+    // We don't want to copy the data already in storage into storage all over again
+    // There is no need to create a snapshot since we are copying data from local storage
+    const addParentToDoFromLocalStorageToManagerArray = (newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus) => {
         if (alreadyInManagerArray(newParentToDoId)) {
             console.log(`Invalid Addition - ${newParentToDoId} already exists!`);
             return;
         }
         const newParentToDo = parentToDo();
-        newParentToDo.createParentToDo(newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus);
-        parentManagerArray.push(newParentToDo);
-        createParentManagerArraySnapshot();
-    }
-
-    const clearParentToDoManagerArray = () => {
-        parentManagerArray.length = 0;
-    }
-
-    const addParentFromLocalStorageToManagerArray = (newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus) => {
-        if (alreadyInManagerArray(newParentToDoId)) {
-            console.log(`Invalid Addition - ${newParentToDoId} already exists!`);
-            return;
-        }
-        const newParentToDo = parentToDo();
-        newParentToDo.createParentToDo(newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus);
-        parentManagerArray.push(newParentToDo);
+        newParentToDo.createNewParentToDo(newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus);
+        newParentToDo.changeParentToDoId(newParentToDoId);
+        parentToDoManagerArray.push(newParentToDo);
     }
 
     const changeParentToDoDescriptionInManagerArray = (parentToDoId, newParentToDoDescription) => {
@@ -111,11 +110,11 @@ const createparentToDoManager = () => {
             return;
         }
 
-        for (let i = 0; i < parentManagerArray.length; i++) {
-            const parentToDo = parentManagerArray[i];
+        for (let i = 0; i < parentToDoManagerArray.length; i++) {
+            const parentToDo = parentToDoManagerArray[i];
             if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
                 parentToDo.changeParentToDoDescription(newParentToDoDescription);
-                createParentManagerArraySnapshot();
+                createParentToDoManagerArraySnapshot();
                 return;
             }
         }
@@ -128,11 +127,11 @@ const createparentToDoManager = () => {
             return;
         }
 
-        for (let i = 0; i < parentManagerArray.length; i++) {
-            const parentToDo = parentManagerArray[i];
+        for (let i = 0; i < parentToDoManagerArray.length; i++) {
+            const parentToDo = parentToDoManagerArray[i];
             if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
                 parentToDo.changeParentToDoDueDate(newParentToDoDueDate);
-                createParentManagerArraySnapshot();
+                createParentToDoManagerArraySnapshot();
                 return;
             }
         }
@@ -149,8 +148,8 @@ const createparentToDoManager = () => {
     //         return;
     //     }
 
-    //     for (let i = 0; i < parentManagerArray.length; i++) {
-    //         const parentToDo = parentManagerArray[i];
+    //     for (let i = 0; i < parentToDoManagerArray.length; i++) {
+    //         const parentToDo = parentToDoManagerArray[i];
     //         if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
     //             parentToDo.changeParentParentToDoCategory(newParentToDoCategory);
     //             return;
@@ -165,11 +164,11 @@ const createparentToDoManager = () => {
             return;
         }
 
-        for (let i = 0; i < parentManagerArray.length; i++) {
-            const parentToDo = parentManagerArray[i];
+        for (let i = 0; i < parentToDoManagerArray.length; i++) {
+            const parentToDo = parentToDoManagerArray[i];
             if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
                 parentToDo.changeParentToDoStatus();
-                createParentManagerArraySnapshot();
+                createParentToDoManagerArraySnapshot();
                 return;
             }
         }
@@ -182,20 +181,24 @@ const createparentToDoManager = () => {
             return;
         }
 
-        for (let i = 0; i < parentManagerArray.length; i++) {
-            const parentToDo = parentManagerArray[i];
+        for (let i = 0; i < parentToDoManagerArray.length; i++) {
+            const parentToDo = parentToDoManagerArray[i];
             if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
                 parentToDo.changeParentToDoTitle(newParentToDoTitle);
-                createParentManagerArraySnapshot();
+                createParentToDoManagerArraySnapshot();
                 return;
             }
         }
     }
 
-    const createParentManagerArraySnapshot = () => {
-        parentManagerArraySnapshot.length = 0;
-        parentManagerArraySnapshot = parentManagerArray.map(parentToDo => structuredClone(parentToDo.getParentToDoInfo()));
-        localStorage.setItem("parentToDos", JSON.stringify(parentManagerArraySnapshot))
+    const clearParentToDoManagerArray = () => {
+        parentToDoManagerArray.length = 0;
+    }
+    
+    const createParentToDoManagerArraySnapshot = () => {
+        parentToDoManagerArraySnapshot.length = 0;
+        parentToDoManagerArraySnapshot = parentToDoManagerArray.map(parentToDo => structuredClone(parentToDo.getParentToDoInfo()));
+        localStorage.setItem("parentToDos", JSON.stringify(parentToDoManagerArraySnapshot))
     }
 
     const deleteParentToDoFromManagerArray = (parentToDoId) => {
@@ -205,32 +208,32 @@ const createparentToDoManager = () => {
             return;
         }
 
-        for (let i = 0; i < parentManagerArray.length; i++) {
-            const parentToDo = parentManagerArray[i];
+        for (let i = 0; i < parentToDoManagerArray.length; i++) {
+            const parentToDo = parentToDoManagerArray[i];
             if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
                 parentToDo.deleteParentToDo();
-                parentManagerArray.splice(i, 1);
-                createParentManagerArraySnapshot();
+                parentToDoManagerArray.splice(i, 1);
+                createParentToDoManagerArraySnapshot();
                 return;
             }
         }
     }
 
     const displayParentToDosInManagerArray = () => {
-        console.table(parentManagerArray.map(parentToDo => parentToDo.getParentToDoInfo()));
+        console.table(parentToDoManagerArray.map(parentToDo => parentToDo.getParentToDoInfo()));
     }
 
     const displayParentToDosInManagerArraySnapshot = () => {
-        createParentManagerArraySnapshot();
-        console.table(parentManagerArraySnapshot);
+        createParentToDoManagerArraySnapshot();
+        console.table(parentToDoManagerArraySnapshot);
     }
 
     return {
-        addParentToDoToManagerArray, addParentFromLocalStorageToManagerArray,
+        addParentToDoToManagerArray, addParentToDoFromLocalStorageToManagerArray,
         changeParentToDoDescriptionInManagerArray, clearParentToDoManagerArray,
         changeParentToDoDueDateInManagerArray,
         changeParentToDoStatusInManagerArray, changeParentToDoTitleInManagerArray,
-        createParentManagerArraySnapshot, deleteParentToDoFromManagerArray, displayParentToDosInManagerArray, displayParentToDosInManagerArraySnapshot
+        createParentToDoManagerArraySnapshot, deleteParentToDoFromManagerArray, displayParentToDosInManagerArray, displayParentToDosInManagerArraySnapshot
     }
 }
 
