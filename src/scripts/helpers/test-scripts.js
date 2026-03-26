@@ -29,34 +29,21 @@ import { projectManager } from "./project.js";
             console.log("Empty Storage! Populating Empty Parent To-Do Into Storage");
             populateStorageWithDefaultParent();
         }
-        if (!localStorage.getItem("atomicToDos")) {
-            console.log("Empty Storage! Populating Empty Atomic To-Do Into Storage");
-            populateStorageWithDefaultAtomic();
-        }
 
         console.log("Storage Not Empty! Hydrating Projects")
         hydateProjectManagerArray();
         console.log("Storage Not Empty! Hydrating Parent To-Dos")
         hydrateParentToDoManagerArray();
-        console.log("Storage Not Empty! Hydrating Parent To-Dos")
-        hydrateParentToDoManagerArray();
-        console.log("Storage Not Empty! Hydrating Atomic To-Dos")
-        hydrateAtomicToDoManagerArray();
     };
 
     const populateStorageWithDefaultProject = () => {
         const initProjectManagerArray = [{ projectId: crypto.randomUUID(), projectName: "Home" }];
-        localStorage.setItem("toDoProjects", JSON.stringify(initProjectManagerArray));
+        localStorage.setItem("toDoProjects", JSON.stringify(initProjectManagerArray))
     }
 
     const populateStorageWithDefaultParent = () => {
         const initParentManagerArray = [];
-        localStorage.setItem("parentToDos", JSON.stringify(initParentManagerArray));
-    }
-
-    const populateStorageWithDefaultAtomic = () => {
-        const initAtomicManagerArray = [];
-        localStorage.setItem("atomicToDos", JSON.stringify(initAtomicManagerArray));
+        localStorage.setItem("parentToDos", JSON.stringify(initParentManagerArray))
     }
 
     const hydateProjectManagerArray = () => {
@@ -78,18 +65,6 @@ import { projectManager } from "./project.js";
         ))
     }
 
-    const hydrateAtomicToDoManagerArray = () => {
-        const atomicToDoProjects = JSON.parse(localStorage.getItem("atomicToDos") || "[]");
-        atomicToDoManager.clearAtomicToDoManagerArray();
-        atomicToDoProjects.forEach(atomic => atomicToDoManager.addAtomicToDoFromLocalStorageToManagerArray(
-            atomic.atomicToDoParentId,
-            atomic.atomicToDoId,
-            atomic.atomicToDoTask,
-            atomic.atomicToDoDueDate,
-            atomic.atomicToDoStatus,
-        ))
-    }
-
     init();
 
     // =================================
@@ -99,7 +74,6 @@ import { projectManager } from "./project.js";
     projectManager.addProjectToManagerArray("Education");
     projectManager.addProjectToManagerArray("Career")
     projectManager.addProjectToManagerArray("Relationship");
-    projectManager.addProjectToManagerArray("Hobbies");
 
     console.log("Displaying Project In Project Manager Array")
     console.log("Works for first time empty storage and non-empty storage")
@@ -199,6 +173,50 @@ import { projectManager } from "./project.js";
     console.log("Displaying Parent To-Dos In Parent Manager Snapshot Array after save to Local Storage")
     parentToDoManager.displayParentToDosInManagerArraySnapshot();
 
+
+    // =================================
+    // ATOMIC TO-DO EXAMPLES & TESTS
+    // =================================
+    // Parent 0 (Home - Kitchen reset)
+    // atomicToDoManager.addAtomicToDoToManagerArray("27b66ef3-5cd6-41a5-aa91-46bc430f5856", "Wash dishes and clear sink", "2026-03-06", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("27b66ef3-5cd6-41a5-aa91-46bc430f5856", "Wipe counters + sweep floor", "2026-03-06", "incomplete");
+
+    // // Parent 1 (Home - Laundry + sheets)
+    // atomicToDoManager.addAtomicToDoToManagerArray("675d7895-beeb-45f9-9c2d-f2f5a2dd4ac5", "Change sheets and pillowcases", "2026-03-07", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("675d7895-beeb-45f9-9c2d-f2f5a2dd4ac5", "Wash and dry laundry load", "2026-03-07", "incomplete");
+
+    // // Parent 2 (Career - Weekly status update)
+    // atomicToDoManager.addAtomicToDoToManagerArray("13162ba9-ab10-4122-86a0-991cda89ccab", "Write 5 bullet update summary", "2026-03-08", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("13162ba9-ab10-4122-86a0-991cda89ccab", "Send status email to team", "2026-03-08", "incomplete");
+
+    // // Parent 3 (Career - Refactor to-do managers)
+    // atomicToDoManager.addAtomicToDoToManagerArray("c6f7c6fa-e406-472a-b564-21f489b9a748", "Add atomicParentId field + set it on create", "2026-03-10", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("c6f7c6fa-e406-472a-b564-21f489b9a748", "Update display join: group children by parentId", "2026-03-10", "incomplete");
+
+    // // Parent 4 (Relationship - Plan date night)
+    // atomicToDoManager.addAtomicToDoToManagerArray("70f66914-8765-46d7-92e0-758cbddc9a1c", "Pick 2 date ideas and text options", "2026-03-09", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("70f66914-8765-46d7-92e0-758cbddc9a1c", "Reserve / confirm plan details", "2026-03-09", "incomplete");
+
+    // // Parent 5 (Relationship - Weekly check-in)
+    // atomicToDoManager.addAtomicToDoToManagerArray("905e3c1b-f1d2-46cd-801e-787815798988", "Write 3 topics to cover (short)", "2026-03-11", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("905e3c1b-f1d2-46cd-801e-787815798988", "Schedule 20 minutes and do check-in", "2026-03-11", "incomplete");
+
+    // // Parent 6 (Education - Read chapter 4)
+    // atomicToDoManager.addAtomicToDoToManagerArray("d17043cc-f02b-4ba8-828e-b67b48b095e9", "Read pages 1-10 and highlight questions", "2026-03-08", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("d17043cc-f02b-4ba8-828e-b67b48b095e9", "Write 5 key takeaways", "2026-03-08", "incomplete");
+
+    // // Parent 7 (Education - Practice problems set)
+    // atomicToDoManager.addAtomicToDoToManagerArray("00c10c16-4245-4862-a813-9b87a17de9be", "Do 10 practice questions timed", "2026-03-09", "incomplete");
+    // atomicToDoManager.addAtomicToDoToManagerArray("00c10c16-4245-4862-a813-9b87a17de9be", "Review mistakes and note patterns", "2026-03-09", "incomplete");
+
+    console.log("Displaying Atomic To-Dos In Atomic Manager Array")
+    console.log("Works for first time empty storage and non-empty storage")
+    atomicToDoManager.displayAtomicToDosInManagerArray();
+
+    console.log("Displaying Atomic To-Dos In Atomic Manager Snapshot Array after save to Local Storage")
+    atomicToDoManager.displayAtomicToDosInManagerArraySnapshot();
+
+
     // =================================
     // ATOMIC TO-DO EXAMPLES & TESTS
     // =================================
@@ -240,5 +258,4 @@ import { projectManager } from "./project.js";
 
     console.log("Displaying Atomic To-Dos In Atomic Manager Snapshot Array after save to Local Storage")
     atomicToDoManager.displayAtomicToDosInManagerArraySnapshot();
-
 })()
