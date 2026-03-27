@@ -5,23 +5,31 @@
 // STORAGE
 // =================================
 const createToDoRepository = () => {
-    const initializeStorage = () => {
-        if (!localStorage.getItem("projects")) {
-            console.log("Empty Storage! Populating Default Project Into Storage");
-            seedDefaultProject();
-        }
+    const exists = (key) => {
+        return localStorage.getItem(key) !== null
     }
 
-    const seedDefaultProject = () => {
-        const initialProjectsData = [{ projectId: crypto.randomUUID(), projectName: "All" }];
-        localStorage.setItem("projects", JSON.stringify(initialProjectsData));
+    const save = (key, data) => {
+        localStorage.setItem(key, JSON.stringify(data));
     }
 
+    const load = (key) => {
+        return JSON.parse(localStorage.getItem(key));
+    }
+
+    return {
+        exists,
+        load,
+        save
+    }
     // use parents and atomics for the equivalent. I'm tired of long names
 }
 
 const toDoRepository = createToDoRepository();
 export { toDoRepository }
+
+
+
 // const createRepositoryManager = () => {
 //     const initStorage = () => {
 //         if (!localStorage.getItem("toDoProjects")) {

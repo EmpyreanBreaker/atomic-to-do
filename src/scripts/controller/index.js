@@ -1,5 +1,6 @@
 import "../../css/reset.css";
 import "../../css/styles.css";
+import { toDoService } from "../service/to-do-service";
 
 
 // Run on page load
@@ -7,7 +8,7 @@ import "../../css/styles.css";
     // =================================
     // READ & LOAD STORAGE
     // =================================
-
+    toDoService.initializeAppData();
     // =================================
     // PROJECT EXAMPLES & TESTS
     // =================================
