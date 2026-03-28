@@ -7,23 +7,69 @@ const createProjectManager = () => {
     const addProject = (newProjectName) => {
         // Refuse addition if project already exists in project manager
         if (projectNameExists(newProjectName)) {
-            return { success: false, reason: "duplicate-name" }
+            return { success: false, reason: `Duplicate Project - ${newProjectName} already exists!` }
         }
 
         const newProject = project();
         newProject.create(newProjectName);
         projectList.push(newProject);
-        return { success: true, project: newProject.getData() };
+        return { success: true, projectData: newProject.getData() };
     }
 
     const addHydratedProject = (parsedData) => {
         if (projectNameExists(parsedData.projectName)) {
-            return { success: false, reason: "duplicate-name" }
+            return { success: false, reason: `Data Error - ${parsedData.projectName} already exists!` }
         }
         const restoredProject = project();
         restoredProject.hydrate(parsedData);
         projectList.push(restoredProject);
-        return { success: true, project: restoredProject.getData() };
+        return { success: true, projectData: restoredProject.getData() };
+    }
+
+    const changeProjectName = (currProjectName, newProjectName) => {
+        if (typeof currProjectName !== "string" || typeof newProjectName !== "string") {
+            return { success: false, reason: `Invalid Change - Provide a current project name and new project name!` }
+        }
+
+        if (!currProjectName.trim() || !newProjectName.trim()) {
+            return { success: false, reason: `Invalid Change - Project names cannot be blank!` }
+        }
+
+        if (currProjectName === "All") {
+            return { success: false, reason: `Default Project - ${currProjectName} cannot be changed!` }
+        }
+
+        if (currProjectName === newProjectName) {
+            return { success: false, reason: `No Change - ${currProjectName} & ${newProjectName} are identical!` }
+        }
+
+        if (!projectNameExists(currProjectName)) {
+            return { success: false, reason: `Non-existent Project - ${currProjectName} is not a current project!` }
+        }
+
+        if (projectNameExists(newProjectName)) {
+            return { success: false, reason: `Duplicate Name - ${newProjectName} already exists!` }
+        }
+
+        for (const project of projectList) {
+            if (project.getName() === currProjectName) {
+                project.setName(newProjectName);
+                return { success: true, projectName: project.getName() };
+            }
+        }
+    }
+
+    const getProjectByName = (projectName) => {
+        for (const project of projectList) {
+            if (project.getName() === projectName) {
+                return { success: true, projectData: project.getData() };
+            }
+        }
+        return { success: false, reason: `Non-existent Project - ${projectName} is not a current project!` }
+    }
+
+    const removeProject = (projectName) => {
+        // TODO
     }
 
     const createSnapshot = () => {
@@ -37,12 +83,14 @@ const createProjectManager = () => {
         projectList.length = 0;
     }
 
-
     return {
         addProject,
         addHydratedProject,
+        changeProjectName,
         createSnapshot,
+        getProjectByName,
         projectNameExists,
+        removeProject, // TODO
         reset,
     }
 }
@@ -52,95 +100,3 @@ const createProjectManager = () => {
 const projectManager = createProjectManager();
 
 export { projectManager };
-// const addProjectFromLocalStorageToManagerArray = (newProjectId, newProjectName) => {
-//     if (projectNameExists(newProjectName)) {
-//         console.log(`Invalid Addition - ${newProjectName} already exists!`);
-//         return;
-//     }
-//     const newProject = project();
-//     newProject.create(newProjectName);
-//     newProject.setId(newProjectId);
-//     projectList.push(newProject);
-// }
-
-// const setNameInManagerArray = (projectName, newProjectName) => {
-//     // Refuse name change of default project
-//     if (projectName === "All") {
-//         console.log(`Invalid name change - ${projectName} cannot be changed!`);
-//         return;
-//     }
-
-//     // Refuse name change if project already exists in project manager
-//     if (projectNameExists(newProjectName)) {
-//         console.log(`Invalid name change - ${newProjectName} already exists!`);
-//         return;
-//     }
-
-//     // Refuse name change if the project does not exist in project manager
-//     if (!projectNameExists(projectName)) {
-//         console.log(`Invalid name change - ${projectName} is not an existing project!`);
-//         return;
-//     }
-
-//     for (let i = 0; i < projectList.length; i++) {
-//         const project = projectList[i];
-//         if (project.getData().projectName === projectName) {
-//             project.setName(newProjectName);
-//             storeToDoProjectManagerArraySnapshot();
-//             return;
-//         }
-//     }
-// }
-
-
-
-// const removeFromManagerArray = (projectName) => {
-//     // Refuse deletion of default project
-//     if (projectName === "All") {
-//         console.log(`Invalid Deletion - Default Project - '${projectName}' cannot be deleted!`);
-//         return;
-//     }
-
-//     // Refuse deletion if the project does not exist in the project manager
-//     if (!projectNameExists(projectName)) {
-//         console.log(`Invalid Deletion - ${projectName} is not an existing project!`);
-//         return;
-//     }
-
-//     for (let i = 0; i < projectList.length; i++) {
-//         const project = projectList[i];
-//         if (project.getData().projectName === projectName) {
-//             project.remove();
-//             projectList.splice(i, 1);
-//             storeToDoProjectManagerArraySnapshot();
-//             return;
-//         }
-//     }
-// }
-
-// const createToDoProjectManagerArraySnapshot = () => {
-//     return managerArraySnapshot = projectList.map(project => structuredClone(project.getData()));
-// }
-
-// const storeToDoProjectManagerArraySnapshot = () => {
-//     managerArraySnapshot = projectList.map(project => structuredClone(project.getData()));
-//     localStorage.setItem("projects", JSON.stringify(managerArraySnapshot))
-// }
-
-// const displayProjectsInManagerArray = () => {
-//     storeToDoProjectManagerArraySnapshot();
-//     console.table(projectList.map(project => project.getData()));
-// }
-
-// const displayProjectsInManagerArraySnapshot = () => {
-//     console.table(managerArraySnapshot);
-// }
-
-// const getDefaultToDoProjectInfo = () => {
-//     for (let i = 0; i < projectList.length; i++) {
-//         const defaultProject = projectList[i].getData();
-//         if (defaultProject.projectName === "All") {
-//             return defaultProject;
-//         }
-//     }
-// }

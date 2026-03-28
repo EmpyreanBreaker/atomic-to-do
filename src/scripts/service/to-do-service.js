@@ -35,9 +35,9 @@ const createToDoService = () => {
             projectManager.reset();
 
             retrievedProjects.forEach(project => {
-                const status = projectManager.addHydratedProject(project);
-                if (!status.success) {
-                    console.log(`Stored data conflict - ${status.reason}!`);
+                const hydrated = projectManager.addHydratedProject(project);
+                if (!hydrated.success) {
+                    console.log(`${hydrated.reason}`);
                 }
             });
         }
@@ -59,20 +59,34 @@ const createToDoService = () => {
         // }
     }
 
-    const createProject = (newProjectName) => {
-        const status = projectManager.addProject(newProjectName);
-        if (status.success) {
+    const changeProjectName = (currProjectName, newProjectName) => {
+        const changed = projectManager.changeProjectName(currProjectName, newProjectName);
+        if (changed.success) {
             toDoRepository.save("projects", projectManager.createSnapshot());
         }
         else {
-            console.log(`Invalid Addition - ${status.reason}!`);
+            console.log(`${changed.reason}`);
         }
     }
 
+    const createProject = (newProjectName) => {
+        const created = projectManager.addProject(newProjectName);
+        if (created.success) {
+            toDoRepository.save("projects", projectManager.createSnapshot());
+        }
+        else {
+            console.log(`${created.reason}`);
+        }
+    }
+
+    const testDisplay = () => { console.table(projectManager.createSnapshot()); }
+
     return {
         createProject,
+        changeProjectName,
         initializeAppData,
         loadAppData,
+        testDisplay,
     }
 }
 const toDoService = createToDoService();

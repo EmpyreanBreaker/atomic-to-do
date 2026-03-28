@@ -8,79 +8,15 @@ import { projectManager } from "./project.js";
 // Run on page load
 (() => {
     // =================================
-    // NOTES: 
-    // WHENEVER YOU MAKE A CHANGE TO A PROJECT
-    // RUN THE DEEPCOPY FUNCTION
-    // SAVE THE DEEP COPY TO STORAGE
-    // LOAD THE DEEP COPY
-    // HOME SERVES AS DEFAAULT PROJECT
-    // =================================
-
-    // =================================
-    // DEFAULT PROJECT SETUP
-    // HOME SERVES AS DEFAULT PROJECT
-    // =================================
-    const init = () => {
-        if (!localStorage.getItem("toDoProjects")) {
-            console.log("Empty Storage! Populating Default Project Into Storage");
-            populateStorageWithDefaultProject();
-        }
-        if (!localStorage.getItem("parentToDos")) {
-            console.log("Empty Storage! Populating Empty Parent To-Do Into Storage");
-            populateStorageWithDefaultParent();
-        }
-
-        console.log("Storage Not Empty! Hydrating Projects")
-        hydateProjectManagerArray();
-        console.log("Storage Not Empty! Hydrating Parent To-Dos")
-        hydrateParentToDoManagerArray();
-    };
-
-    const populateStorageWithDefaultProject = () => {
-        const initProjectManagerArray = [{ projectId: crypto.randomUUID(), projectName: "Home" }];
-        localStorage.setItem("toDoProjects", JSON.stringify(initProjectManagerArray))
-    }
-
-    const populateStorageWithDefaultParent = () => {
-        const initParentManagerArray = [];
-        localStorage.setItem("parentToDos", JSON.stringify(initParentManagerArray))
-    }
-
-    const hydateProjectManagerArray = () => {
-        const toDoProjects = JSON.parse(localStorage.getItem("toDoProjects") || "[]");
-        projectManager.clearProjectManagerArray();
-        toDoProjects.forEach(project => projectManager.addProjectFromLocalStorageToManagerArray(project.projectId, project.projectName));
-    }
-
-    const hydrateParentToDoManagerArray = () => {
-        const parentToDoProjects = JSON.parse(localStorage.getItem("parentToDos") || "[]");
-        parentToDoManager.clearParentToDoManagerArray();
-        parentToDoProjects.forEach(parent => parentToDoManager.addParentToDoFromLocalStorageToManagerArray(
-            parent.parentToDoProjectId,
-            parent.parentToDoId,
-            parent.parentToDoTitle,
-            parent.parentToDoDescription,
-            parent.parentToDoDueDate,
-            parent.parentToDoStatus
-        ))
-    }
-
-    init();
-
-    // =================================
     // PROJECT EXAMPLES & TESTS
     // =================================
-    projectManager.addProjectToManagerArray("Home");
-    projectManager.addProjectToManagerArray("Education");
-    projectManager.addProjectToManagerArray("Career")
-    projectManager.addProjectToManagerArray("Relationship");
+    toDoService.createProject("Home");
+    toDoService.createProject("Work");
+    toDoService.createProject("Relationship");
+    toDoService.changeProjectName("Career", "Education");
+    toDoService.changeProjectName("Career", "Hobbies");
 
-    console.log("Displaying Project In Project Manager Array")
-    console.log("Works for first time empty storage and non-empty storage")
-    projectManager.displayProjectsInManagerArray();
-
-    console.log("Displaying Project In Project Manager Snapshot Array after save to Local Storage")
-    projectManager.displayProjectsInManagerArraySnapshot();
+    toDoService.testDisplay();
 
     // =================================
     // PARENT TO-DO EXAMPLES & TESTS

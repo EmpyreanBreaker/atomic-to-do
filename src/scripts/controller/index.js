@@ -9,19 +9,15 @@ import { toDoService } from "../service/to-do-service";
     // READ & LOAD STORAGE
     // =================================
     toDoService.initializeAppData();
+    toDoService.loadAppData();
     // =================================
     // PROJECT EXAMPLES & TESTS
     // =================================
-    // toDoProjectManager.addProjectToManagerArray("All");
-    // toDoProjectManager.addProjectToManagerArray("Education");
-    // toDoProjectManager.addProjectToManagerArray("Career")
-    // toDoProjectManager.addProjectToManagerArray("Relationship");
-    // toDoProjectManager.addProjectToManagerArray("Hobbies");
-
-    // console.log("Displaying Project In Project Manager Array")
-    // console.log("Works for first time empty storage and non-empty storage")
-    // toDoProjectManager.displayProjectsInManagerArray();
-
-    // console.log("Displaying Project In Project Manager Snapshot Array after save to Local Storage")
-    // toDoProjectManager.displayProjectsInManagerArraySnapshot();
+    toDoService.createProject("Home");
+    toDoService.createProject("Work");
+    toDoService.createProject("Relationship");
+    toDoService.changeProjectName("Career", "Education");
+    toDoService.changeProjectName("Career", "Hobbies");
+  
+    toDoService.testDisplay();
 })()
