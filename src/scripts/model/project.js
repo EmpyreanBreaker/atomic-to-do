@@ -1,58 +1,50 @@
 // This function creates and manipulates project objects
 const project = () => {
-    // Private fields
-    let projectId = "";
-    let projectName = "";
+  // Private fields
+  let id = "";
+  let name = "";
 
-    const create = (newProjectName) => {
-        projectId = crypto.randomUUID();
-        projectName = newProjectName;
-    }
+  const create = (newName) => {
+    id = crypto.randomUUID();
+    name = newName;
+  };
 
-    const getData = () => {
-        return { projectId, projectName };
-    }
+  const getData = () => {
+    return { id, name };
+  };
 
-    const getId = () => {
-        return projectId;
-    }
+  const getId = () => {
+    return id;
+  };
 
-    const getName = () => {
-        return projectName;
-    }
+  const getName = () => {
+    return name;
+  };
 
-    const hydrate = (parsedData) => {
-        projectId = parsedData.projectId;
-        projectName = parsedData.projectName;
-    }
+  const hydrate = (parsedData) => {
+    id = parsedData.id;
+    name = parsedData.name;
+  };
 
-    const setName = (newProjectName) => {
-        if (projectName === "All") {
-            return { success: false, reason: "default-project-cannot-be-renamed" };
-        }
-        projectName = newProjectName;
-    }
+  const remove = () => {
+    id = null;
+    name = null;
+  };
+  
+  const setName = (newName) => {
+    name = newName;
+  };
 
-    const remove = () => {
-        projectId = null;
-        projectName = null;
-    }
+  // Use closure to interact with local variables
+  return {
+    create,
+    getData,
+    getId,
+    getName,
+    hydrate,
+    remove,
+    setName,
+  };
+};
 
-    const toJSON = () => {
-        return { projectId, projectName };
-    };
-
-    // Use closure to interact with local variables
-    return {
-        create,
-        getData,
-        getId,
-        getName,
-        hydrate,
-        setName,
-        remove,
-        toJSON
-    };
-}
-
-export { project }
+export { project };

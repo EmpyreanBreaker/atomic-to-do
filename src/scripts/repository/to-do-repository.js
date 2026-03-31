@@ -5,30 +5,28 @@
 // STORAGE
 // =================================
 const createToDoRepository = () => {
-    const exists = (key) => {
-        return localStorage.getItem(key) !== null
-    }
+  const exists = (key) => {
+    return localStorage.getItem(key) !== null;
+  };
 
-    const save = (key, data) => {
-        localStorage.setItem(key, JSON.stringify(data));
-    }
+  const save = (key, data) => {
+    localStorage.setItem(key, JSON.stringify(data));
+  };
 
-    const load = (key) => {
-        return JSON.parse(localStorage.getItem(key));
-    }
+  const load = (key) => {
+    return JSON.parse(localStorage.getItem(key));
+  };
 
-    return {
-        exists,
-        load,
-        save
-    }
-    // use parents and atomics for the equivalent. I'm tired of long names
-}
+  return {
+    exists,
+    load,
+    save,
+  };
+  // use parents and atomics for the equivalent. I'm tired of long names
+};
 
 const toDoRepository = createToDoRepository();
-export { toDoRepository }
-
-
+export { toDoRepository };
 
 // const createRepositoryManager = () => {
 //     const initStorage = () => {

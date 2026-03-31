@@ -1,242 +1,118 @@
-// This function creates and manipulates Parent To-Do objects
-const parentToDo = () => {
-    // Private fields
-    let parentToDoProjectId = "";
-    let parentToDoId = "";
-    let parentToDoTitle = "";
-    let parentToDoDescription = "";
-    let parentToDoStatus = "";
-    let parentToDoDueDate = "";
+// This function creates and manipulates parent objects
+const parent = () => {
+  // Private fields
+  let id = "";
+  let projectId = "";
+  let title = "";
+  let description = "";
+  let dueDate = "";
+  let status = "";
 
-    const createNewParentToDo = (newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus = "incomplete") => {
-        parentToDoProjectId = newParentToDoProjectId;
-        parentToDoId = crypto.randomUUID();
-        parentToDoTitle = newParentToDoTitle;
-        parentToDoDescription = newParentToDoDescription.trim();
-        parentToDoDueDate = newParentToDoDueDate;
-        parentToDoStatus = newParentToDoStatus;
-    }
+  const create = (
+    newProjectId,
+    newTitle,
+    newDescription,
+    newStatus = "incomplete",
+    newDueDate,
+  ) => {
+    id = crypto.randomUUID();
+    projectId = newProjectId;
+    title = newTitle;
+    description = newDescription;
+    dueDate = newDueDate;
+    status = newStatus;
+  };
 
-    const changeParentToDoDescription = (newParentToDoDescription) => {
-        if (newParentToDoDescription !== null || newParentToDoDescription !== "") {
-            parentToDoDescription = newParentToDoDescription;
-        }
-    }
-
-    const changeParentToDoDueDate = (newParentToDoDueDate) => {
-        if (newParentToDoDueDate !== null || newParentToDoDueDate !== "") {
-            parentToDoDueDate = newParentToDoDueDate;
-        }
-    }
-
-    const changeParentToDoId = (newParentToDoId) => {
-        parentToDoId = newParentToDoId;
-    }
-
-    // SHOULD BE CHANGE PARENT PROJECT ID
-    // const changeParentParentToDoCategory = (newParentToDoCategory) => {
-    //     if (newParentToDoCategory !== null || newParentToDoCategory !== "") {
-    //         parentToDoCategory = newParentToDoCategory;
-    //     }
-    // }
-
-    const changeParentToDoStatus = () => {
-        parentToDoStatus === "incomplete" ? parentToDoStatus = "completed" : parentToDoStatus = "incomplete";
-    }
-
-    const changeParentToDoTitle = (newParentToDoTitle) => {
-        if (newParentToDoTitle !== null || newParentToDoTitle !== "") {
-            parentToDoTitle = newParentToDoTitle;
-        }
-    }
-
-    const deleteParentToDo = () => {
-        parentToDoId = null;
-        parentToDoTitle = null;
-        parentToDoDescription = null;
-        parentToDoDueDate = null;
-        parentToDoStatus = null;
-    }
-
-    const getParentToDoInfo = () => {
-        return { parentToDoProjectId, parentToDoId, parentToDoTitle, parentToDoDescription, parentToDoDueDate, parentToDoStatus }
-    }
-
+  const getData = () => {
     return {
-        createNewParentToDo,
-        changeParentToDoDescription,
-        changeParentToDoDueDate, changeParentToDoId,
-        changeParentToDoStatus, changeParentToDoTitle,
-        deleteParentToDo, getParentToDoInfo
-    }
-}
+      id,
+      projectId,
+      title,
+      description,
+      dueDate,
+      status,
+    };
+  };
 
-// This function serves as a manager function that creates, fills, and manipulates an array of parent-to-do objects
-const createparentToDoManager = () => {
-    // Private array to hold atomic-to-do objects
-    const parentToDoManagerArray = [];
-    let parentToDoManagerArraySnapshot = [];
+  const getDescription = () => {
+    return description;
+  };
 
-    // Helper Function - Checks if the project already exists in the array
-    const alreadyInManagerArray = (parentToDoId) => parentToDoManagerArray.some(parentToDo => parentToDo.getParentToDoInfo().parentToDoId === parentToDoId);
+  const getDueDate = () => {
+    return dueDate;
+  };
 
-    // We don't need to be concerned about duplicates. People should be able to duplicate tasks
-    // The id will change automatically and they can write the same task title and description as needed
-    const addParentToDoToManagerArray = (newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus) => {
-        const newParentToDo = parentToDo();
-        newParentToDo.createNewParentToDo(newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus);
-        parentToDoManagerArray.push(newParentToDo);
-        createParentToDoManagerArraySnapshot();
-    }
+  const getId = () => {
+    return id;
+  };
 
-    // We do need to be concerned about duplicates here
-    // We don't want to copy the data already in storage into storage all over again
-    // There is no need to create a snapshot since we are copying data from local storage
-    const addParentToDoFromLocalStorageToManagerArray = (newParentToDoProjectId, newParentToDoId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus) => {
-        if (alreadyInManagerArray(newParentToDoId)) {
-            console.log(`Invalid Addition - ${newParentToDoId} already exists!`);
-            return;
-        }
-        const newParentToDo = parentToDo();
-        newParentToDo.createNewParentToDo(newParentToDoProjectId, newParentToDoTitle, newParentToDoDescription, newParentToDoDueDate, newParentToDoStatus);
-        newParentToDo.changeParentToDoId(newParentToDoId);
-        parentToDoManagerArray.push(newParentToDo);
-    }
+  const getProjectId = () => {
+    return projectId;
+  };
 
-    const changeParentToDoDescriptionInManagerArray = (parentToDoId, newParentToDoDescription) => {
-        // Refuse parentToDoDescription change if the project does not exist in project manager
-        if (!alreadyInManagerArray(parentToDoId)) {
-            console.log(`Invalid parentToDoDescription change - This is not an existing Parent To-Do!`);
-            return;
-        }
+  const getStatus = () => {
+    return status;
+  };
 
-        for (let i = 0; i < parentToDoManagerArray.length; i++) {
-            const parentToDo = parentToDoManagerArray[i];
-            if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
-                parentToDo.changeParentToDoDescription(newParentToDoDescription);
-                createParentToDoManagerArraySnapshot();
-                return;
-            }
-        }
-    }
+  const getTitle = () => {
+    return title;
+  };
 
-    const changeParentToDoDueDateInManagerArray = (parentToDoId, newParentToDoDueDate) => {
-        // Refuse parentToDoDescription change if the project does not exist in project manager
-        if (!alreadyInManagerArray(parentToDoId)) {
-            console.log(`Invalid due date change - This is not an existing Parent To-Do!`);
-            return;
-        }
+  const hydrate = (parsedData) => {
+    id = parsedData.id;
+    projectId = parsedData.projectId;
+    title = parsedData.title;
+    description = parsedData.description;
+    dueDate = parsedData.dueDate;
+    status = parsedData.status;
+  };
 
-        for (let i = 0; i < parentToDoManagerArray.length; i++) {
-            const parentToDo = parentToDoManagerArray[i];
-            if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
-                parentToDo.changeParentToDoDueDate(newParentToDoDueDate);
-                createParentToDoManagerArraySnapshot();
-                return;
-            }
-        }
-    }
+  const remove = () => {
+    id = null;
+    projectId = null;
+    title = null;
+    description = null;
+    dueDate = null;
+    status = null;
+  };
 
-    // I think the logic is to change the parent project id
-    // Get the id of the parent via the UI
-    // Get the category
-    // Then make the change
-    // const changeParentParentToDoCategoryInManagerArray = (parentToDoId, newParentToDoCategory) => {
-    //     // Refuse parentToDoDescription change if the project does not exist in project manager
-    //     if (!alreadyInManagerArray(parentToDoId)) {
-    //         console.log(`Invalid project name change - This is not an existing Parent To-Do!`);
-    //         return;
-    //     }
+  const setDescription = (newDescription) => {
+    description = newDescription;
+  };
 
-    //     for (let i = 0; i < parentToDoManagerArray.length; i++) {
-    //         const parentToDo = parentToDoManagerArray[i];
-    //         if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
-    //             parentToDo.changeParentParentToDoCategory(newParentToDoCategory);
-    //             return;
-    //         }
-    //     }
-    // }
+  const setDueDate = (newDueDate) => {
+    dueDate = newDueDate;
+  };
 
-    const changeParentToDoStatusInManagerArray = (parentToDoId) => {
-        // Refuse parentToDoDescription change if the project does not exist in project manager
-        if (!alreadyInManagerArray(parentToDoId)) {
-            console.log(`Invalid parentToDoStatus change - This is not an existing Parent To-Do!`);
-            return;
-        }
+  const setProjectId = (newProjectId) => {
+    projectId = newProjectId;
+  };
 
-        for (let i = 0; i < parentToDoManagerArray.length; i++) {
-            const parentToDo = parentToDoManagerArray[i];
-            if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
-                parentToDo.changeParentToDoStatus();
-                createParentToDoManagerArraySnapshot();
-                return;
-            }
-        }
-    }
+  const setStatus = (newStatus) => {
+    status = newStatus;
+  };
 
-    const changeParentToDoTitleInManagerArray = (parentToDoId, newParentToDoTitle) => {
-        // Refuse parentToDoDescription change if the project does not exist in project manager
-        if (!alreadyInManagerArray(parentToDoId)) {
-            console.log(`Invalid parentToDoTitle change - This is not an existing Parent To-Do!`);
-            return;
-        }
+  const setTitle = (newTitle) => {
+    title = newTitle;
+  };
 
-        for (let i = 0; i < parentToDoManagerArray.length; i++) {
-            const parentToDo = parentToDoManagerArray[i];
-            if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
-                parentToDo.changeParentToDoTitle(newParentToDoTitle);
-                createParentToDoManagerArraySnapshot();
-                return;
-            }
-        }
-    }
+  return {
+    create,
+    getData,
+    getDescription,
+    getDueDate,
+    getId,
+    getProjectId,
+    getStatus,
+    getTitle,
+    hydrate,
+    remove,
+    setDescription,
+    setDueDate,
+    setProjectId,
+    setStatus,
+    setTitle,
+  };
+};
 
-    const clearParentToDoManagerArray = () => {
-        parentToDoManagerArray.length = 0;
-    }
-    
-    const createParentToDoManagerArraySnapshot = () => {
-        parentToDoManagerArraySnapshot.length = 0;
-        parentToDoManagerArraySnapshot = parentToDoManagerArray.map(parentToDo => structuredClone(parentToDo.getParentToDoInfo()));
-        localStorage.setItem("parentToDos", JSON.stringify(parentToDoManagerArraySnapshot))
-    }
-
-    const deleteParentToDoFromManagerArray = (parentToDoId) => {
-        // Refuse deletion if the project does not exist in the project manager
-        if (!alreadyInManagerArray(parentToDoId)) {
-            console.log(`Invalid deletion - This is not an existing Parent To-Do!`);
-            return;
-        }
-
-        for (let i = 0; i < parentToDoManagerArray.length; i++) {
-            const parentToDo = parentToDoManagerArray[i];
-            if (parentToDo.getParentToDoInfo().parentToDoId === parentToDoId) {
-                parentToDo.deleteParentToDo();
-                parentToDoManagerArray.splice(i, 1);
-                createParentToDoManagerArraySnapshot();
-                return;
-            }
-        }
-    }
-
-    const displayParentToDosInManagerArray = () => {
-        console.table(parentToDoManagerArray.map(parentToDo => parentToDo.getParentToDoInfo()));
-    }
-
-    const displayParentToDosInManagerArraySnapshot = () => {
-        createParentToDoManagerArraySnapshot();
-        console.table(parentToDoManagerArraySnapshot);
-    }
-
-    return {
-        addParentToDoToManagerArray, addParentToDoFromLocalStorageToManagerArray,
-        changeParentToDoDescriptionInManagerArray, clearParentToDoManagerArray,
-        changeParentToDoDueDateInManagerArray,
-        changeParentToDoStatusInManagerArray, changeParentToDoTitleInManagerArray,
-        createParentToDoManagerArraySnapshot, deleteParentToDoFromManagerArray, displayParentToDosInManagerArray, displayParentToDosInManagerArraySnapshot
-    }
-}
-
-const parentToDoManager = createparentToDoManager();
-
-export { parentToDoManager }
+export { parent };
