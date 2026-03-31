@@ -15,8 +15,8 @@ import { toDoService } from "../service/to-do-service";
   toDoService.createProject("Home");
   toDoService.createProject("Work");
   toDoService.createProject("Relationship");
-  toDoService.changeProjectName("Career", "Education");
-  toDoService.changeProjectName("Career", "Hobbies");
+  toDoService.changeProjectName("Work", "Career");
+  toDoService.createProject("Education");
 
   toDoService.testDisplay();
 })();
