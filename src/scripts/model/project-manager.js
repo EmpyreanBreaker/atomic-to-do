@@ -19,7 +19,7 @@ const createProjectManager = () => {
     if (nameExists(cleanNewName)) {
       return {
         success: false,
-        reason: `Duplicate Project - ${cleanNewName} already exists!`,
+        reason: `Duplicate Project - ${cleanNewName} already exists in the project list!`,
       };
     }
 
@@ -56,7 +56,7 @@ const createProjectManager = () => {
     if (nameExists(cleanName)) {
       return {
         success: false,
-        reason: `Data Error - ${cleanName} already exists!`,
+        reason: `Data Error - ${cleanName} already exists in the project list!`,
       };
     }
 
@@ -108,7 +108,7 @@ const createProjectManager = () => {
     if (nameExists(cleanNewName)) {
       return {
         success: false,
-        reason: `Duplicate Name - ${cleanNewName} already exists!`,
+        reason: `Duplicate Name - ${cleanNewName} already exists in the project list!`,
       };
     }
     
