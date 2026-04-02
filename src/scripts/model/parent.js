@@ -8,13 +8,7 @@ const parent = () => {
   let dueDate = "";
   let status = "";
 
-  const create = (
-    newProjectId,
-    newTitle,
-    newDescription,
-    newStatus = "incomplete",
-    newDueDate,
-  ) => {
+  const create = (newProjectId, newTitle, newDescription, newStatus = "incomplete", newDueDate) => {
     id = crypto.randomUUID();
     projectId = newProjectId;
     title = newTitle;

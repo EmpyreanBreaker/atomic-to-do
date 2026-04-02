@@ -30,7 +30,7 @@ const project = () => {
     id = null;
     name = null;
   };
-  
+
   const setName = (newName) => {
     name = newName;
   };

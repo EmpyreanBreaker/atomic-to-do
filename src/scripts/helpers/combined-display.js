@@ -27,8 +27,7 @@ const createCombinedToDoManager = () => {
       console.log(`Parent ID: ${parentId}`);
       console.table([parent]);
 
-      const atomicChildrenForThisParent =
-        atomicToDoByParentIdMap.get(parentId) || [];
+      const atomicChildrenForThisParent = atomicToDoByParentIdMap.get(parentId) || [];
       console.table(atomicChildrenForThisParent);
     }
   };
@@ -79,9 +78,7 @@ const createCombinedToDoManager = () => {
       console.table([project]);
 
       const innerMap = allToDosByProjectNameMap.get(projectName) || new Map();
-      const parentForThisProject = parentArray.filter(
-        (p) => p.parentCategory === projectName,
-      );
+      const parentForThisProject = parentArray.filter((p) => p.parentCategory === projectName);
 
       for (const parent of parentForThisProject) {
         const parentId = parent.testParentId;

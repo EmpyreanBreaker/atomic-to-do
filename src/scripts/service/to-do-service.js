@@ -57,10 +57,7 @@ const createToDoService = () => {
   };
 
   const changeProjectName = (currProjectName, newProjectName) => {
-    const changed = projectManager.changeProjectName(
-      currProjectName,
-      newProjectName,
-    );
+    const changed = projectManager.changeProjectName(currProjectName, newProjectName);
     if (changed.success) {
       toDoRepository.save("projects", projectManager.createSnapshot());
     } else {

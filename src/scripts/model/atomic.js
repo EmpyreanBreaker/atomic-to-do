@@ -38,9 +38,7 @@ const atomicToDo = () => {
   };
 
   const changeAtomicToDoStatus = () => {
-    atomicToDoStatus === "incomplete"
-      ? (atomicToDoStatus = "completed")
-      : (atomicToDoStatus = "incomplete");
+    atomicToDoStatus === "incomplete" ? (atomicToDoStatus = "completed") : (atomicToDoStatus = "incomplete");
   };
 
   const deleteAtomicToDo = () => {
@@ -78,10 +76,7 @@ const createNewAtomicToDoManager = () => {
 
   // Helper Function - Checks if the atomic to-do is already exists in the array
   const alreadyInManagerArray = (atomicToDoId) =>
-    atomicToDoManagerArray.some(
-      (atomicToDo) =>
-        atomicToDo.getAtomicToDoInfo().atomicToDoId === atomicToDoId,
-    );
+    atomicToDoManagerArray.some((atomicToDo) => atomicToDo.getAtomicToDoInfo().atomicToDoId === atomicToDoId);
 
   // We don't need to be concerned about duplicates. People should be able to duplicate tasks
   // The id will change automatically and they can write the same task title and description as needed
@@ -127,15 +122,10 @@ const createNewAtomicToDoManager = () => {
     atomicToDoManagerArray.push(newAtomicToDo);
   };
 
-  const changeAtomicToDoTaskInManagerArray = (
-    atomicToDoId,
-    newAtomicToDoTask,
-  ) => {
+  const changeAtomicToDoTaskInManagerArray = (atomicToDoId, newAtomicToDoTask) => {
     // Refuse atomicToDoTask change if the project does not exist in project manager
     if (!alreadyInManagerArray(atomicToDoId)) {
-      console.log(
-        `Invalid Atomic To-Do task change - This is not an existing Atomic To-Do!`,
-      );
+      console.log(`Invalid Atomic To-Do task change - This is not an existing Atomic To-Do!`);
       return;
     }
 
@@ -149,15 +139,10 @@ const createNewAtomicToDoManager = () => {
     }
   };
 
-  const changeAtomicToDoDueDateInManagerArray = (
-    atomicToDoId,
-    newAtomicToDoDueDate,
-  ) => {
+  const changeAtomicToDoDueDateInManagerArray = (atomicToDoId, newAtomicToDoDueDate) => {
     // Refuse atomicToDoTask change if the project does not exist in project manager
     if (!alreadyInManagerArray(atomicToDoId)) {
-      console.log(
-        `Invalid due date change - This is not an existing Atomic To-Do!`,
-      );
+      console.log(`Invalid due date change - This is not an existing Atomic To-Do!`);
       return;
     }
 
@@ -174,9 +159,7 @@ const createNewAtomicToDoManager = () => {
   const changeAtomicToDoStatusInManagerArray = (atomicToDoId) => {
     // Refuse atomicToDoTask change if the project does not exist in project manager
     if (!alreadyInManagerArray(atomicToDoId)) {
-      console.log(
-        `Invalid atomicToDoStatus change - This is not an existing Atomic To-Do!`,
-      );
+      console.log(`Invalid atomicToDoStatus change - This is not an existing Atomic To-Do!`);
       return;
     }
 
@@ -199,10 +182,7 @@ const createNewAtomicToDoManager = () => {
     atomicToDoManagerArraySnapshot = atomicToDoManagerArray.map((atomicToDo) =>
       structuredClone(atomicToDo.getAtomicToDoInfo()),
     );
-    localStorage.setItem(
-      "atomicToDos",
-      JSON.stringify(atomicToDoManagerArraySnapshot),
-    );
+    localStorage.setItem("atomicToDos", JSON.stringify(atomicToDoManagerArraySnapshot));
   };
 
   const deleteAtomicToDoFromManagerArray = (atomicToDoId) => {
@@ -224,11 +204,7 @@ const createNewAtomicToDoManager = () => {
   };
 
   const displayAtomicToDosInManagerArray = () => {
-    console.table(
-      atomicToDoManagerArray.map((atomicToDo) =>
-        atomicToDo.getAtomicToDoInfo(),
-      ),
-    );
+    console.table(atomicToDoManagerArray.map((atomicToDo) => atomicToDo.getAtomicToDoInfo()));
   };
 
   const displayAtomicToDosInManagerArraySnapshot = () => {

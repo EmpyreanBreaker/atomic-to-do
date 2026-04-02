@@ -16,7 +16,7 @@ const createProjectManager = () => {
     }
 
     // Refuse addition if project already exists in project manager
-    if (nameExists(cleanNewName)) {
+    if (projectNameExists(cleanNewName)) {
       return {
         success: false,
         reason: `Duplicate Project - ${cleanNewName} already exists in the project list!`,
@@ -33,27 +33,28 @@ const createProjectManager = () => {
     if (!parsedData || typeof parsedData !== "object") {
       return {
         success: false,
-        reason: `Data Error - Stored project data is invalid!`,
+        reason: `Data Error - Stored project data must be a valid object!`,
       };
     }
 
-    if (typeof parsedData.id !== "string" || parsedData.id.trim() === "") {
+    const cleanId = typeof parsedData.id === "string" ? parsedData.id.trim() : "";
+    const cleanName = normalizeName(parsedData.name);
+
+    if (cleanId === "") {
       return {
         success: false,
-        reason: `Data Error - Project id is invalid in stored data!`,
+        reason: `Data Error - Stored project id must be a nonblank string!`,
       };
     }
-
-    const cleanName = normalizeName(parsedData.name);
 
     if (cleanName === "") {
       return {
         success: false,
-        reason: `Data Error - Project name is invalid in stored data!`,
+        reason: `Data Error - Stored project name must be a nonblank string!`,
       };
     }
 
-    if (nameExists(cleanName)) {
+    if (projectNameExists(cleanName)) {
       return {
         success: false,
         reason: `Data Error - ${cleanName} already exists in the project list!`,
@@ -61,7 +62,7 @@ const createProjectManager = () => {
     }
 
     const cleanedData = {
-      id: parsedData.id,
+      id: cleanId,
       name: cleanName,
     };
 
@@ -78,7 +79,7 @@ const createProjectManager = () => {
     if (!cleanCurrName || !cleanNewName) {
       return {
         success: false,
-        reason: `Invalid Change - Project names must be a string and not blank!`,
+        reason: `Invalid Change - Project names must be a nonblank string!`,
       };
     }
 
@@ -105,13 +106,13 @@ const createProjectManager = () => {
       };
     }
 
-    if (nameExists(cleanNewName)) {
+    if (projectNameExists(cleanNewName)) {
       return {
         success: false,
         reason: `Duplicate Name - ${cleanNewName} already exists in the project list!`,
       };
     }
-    
+
     targetProject.setName(cleanNewName);
     return { success: true, name: targetProject.getName() };
   };
@@ -159,7 +160,7 @@ const createProjectManager = () => {
   };
 
   // Checks if a project already exists in the manager array
-  const nameExists = (cleanName) => {
+  const projectNameExists = (cleanName) => {
     return projectList.some((project) => project.getName() === cleanName);
   };
 
@@ -173,7 +174,6 @@ const createProjectManager = () => {
     changeProjectName,
     createSnapshot,
     getProjectByName,
-    nameExists,
     removeProject, // TODO
     reset,
   };

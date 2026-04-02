@@ -105,9 +105,7 @@ import { projectManager } from "./project.js";
   console.log("Works for first time empty storage and non-empty storage");
   parentToDoManager.displayParentToDosInManagerArray();
 
-  console.log(
-    "Displaying Parent To-Dos In Parent Manager Snapshot Array after save to Local Storage",
-  );
+  console.log("Displaying Parent To-Dos In Parent Manager Snapshot Array after save to Local Storage");
   parentToDoManager.displayParentToDosInManagerArraySnapshot();
 
   // =================================
@@ -149,9 +147,7 @@ import { projectManager } from "./project.js";
   console.log("Works for first time empty storage and non-empty storage");
   atomicToDoManager.displayAtomicToDosInManagerArray();
 
-  console.log(
-    "Displaying Atomic To-Dos In Atomic Manager Snapshot Array after save to Local Storage",
-  );
+  console.log("Displaying Atomic To-Dos In Atomic Manager Snapshot Array after save to Local Storage");
   atomicToDoManager.displayAtomicToDosInManagerArraySnapshot();
 
   // =================================
@@ -273,8 +269,6 @@ import { projectManager } from "./project.js";
   console.log("Works for first time empty storage and non-empty storage");
   atomicToDoManager.displayAtomicToDosInManagerArray();
 
-  console.log(
-    "Displaying Atomic To-Dos In Atomic Manager Snapshot Array after save to Local Storage",
-  );
+  console.log("Displaying Atomic To-Dos In Atomic Manager Snapshot Array after save to Local Storage");
   atomicToDoManager.displayAtomicToDosInManagerArraySnapshot();
 })();
