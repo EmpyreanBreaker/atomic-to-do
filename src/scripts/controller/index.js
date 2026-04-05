@@ -1,5 +1,6 @@
 import "../../css/reset.css";
 import "../../css/styles.css";
+import { atomicService } from "../service/atomic-service";
 import { parentService } from "../service/parent-service";
 import { projectService } from "../service/project-service";
 
@@ -47,4 +48,17 @@ import { projectService } from "../service/project-service";
   // Original: Clean kitchen
   // parentService.changeParentTitle("8b7116db-a247-4c78-a3af-6e686486c5f4", "Thoroughly clean the kitchen");
   parentService.testParentDisplay();
+  // =================================
+  // ATOMIC READ & LOAD STORAGE
+  // =================================
+  atomicService.initializeAtomicAppData();
+  atomicService.loadAtomicAppData();
+  // =================================
+  // ATOMIC EXAMPLES & TESTS
+  // =================================
+  // Creation handled in service due
+  // Otherwise creation causes duplicate data
+  // Because each run makes a new parentId due to crypto.randomUID()
+  // This will not be a problem with UI creation since creation will be temporary
+  atomicService.testAtomicDisplay();
 })();

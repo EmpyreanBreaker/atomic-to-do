@@ -12,12 +12,6 @@ const createProjectService = () => {
 
       toDoRepository.save("projects", [defaultProject.getData()]);
     }
-
-    // if (!toDoRepository.exists("atomics")) {
-    //     console.log("Populating Default Atomic data Into Storage");
-    //     const initialAtomicData = atomicManager.createSnapshot();
-    //     toDoRepository.save("atomics", initialAtomicData);
-    // }
   };
 
   const loadProjectAppData = () => {
@@ -32,14 +26,6 @@ const createProjectService = () => {
         }
       });
     }
-
-    // if (toDoRepository.exists("atomics")) {
-    //      atomicManager.reset();
-    //     const retrievedAtomics = toDoRepository.load("atomics");
-    //     retrievedAtomics.forEach(atomic => {
-    //         atomicManager.addHydratedAtomic(atomic);
-    //     })
-    // }
   };
 
   const changeProjectName = (currName, newName) => {

@@ -1,8 +1,5 @@
 import { toDoRepository } from "../repository/to-do-repository";
-import { project } from "../model/project";
 import { parentManager } from "../model/parent-manager";
-import { projectManager } from "../model/project-manager";
-import { el } from "date-fns/locale";
 
 const createParentService = () => {
   const initializeParentAppData = () => {
@@ -88,8 +85,10 @@ const createParentService = () => {
     const created = parentManager.addParent(newProjectId, newTitle, newDescription, newDueDate, newStatus);
     if (created.success) {
       toDoRepository.save("parents", parentManager.createSnapshot());
+      return { success: true, parentData: created.parentData };
     } else {
       console.log(`${created.reason}`);
+      return { success: false, reason: created.reason };
     }
   };
 

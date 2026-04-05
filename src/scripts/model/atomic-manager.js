@@ -4,7 +4,7 @@ import { atomic } from "./atomic.js";
 const createAtomicManager = () => {
   const atomicList = [];
 
-  const addAtomic = (newParentId, newTask = "", newStatus = "incomplete", newDueDate = "") => {
+  const addAtomic = (newParentId, newTask = "", newDueDate = "", newStatus = "incomplete") => {
     const cleanParentId = typeof newParentId === "string" ? newParentId.trim() : "";
     const cleanTask = typeof newTask === "string" ? newTask.trim() : "";
     const normalizedDueDate = normalizeDueDate(newDueDate);
