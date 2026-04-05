@@ -3,19 +3,18 @@ import { parent } from "./parent.js";
 const createParentManager = () => {
   const parentList = [];
 
-  // All values can be empty except for ProjectId
   const addParent = (
     newProjectId,
     newTitle = "",
     newDescription = "",
-    newStatus = "incomplete",
     newDueDate = "",
+    newStatus = "incomplete",
   ) => {
     const cleanProjectId = typeof newProjectId === "string" ? newProjectId.trim() : "";
     const cleanTitle = typeof newTitle === "string" ? newTitle.trim() : "";
     const cleanDescription = typeof newDescription === "string" ? newDescription.trim() : "";
-    let cleanStatus = typeof newStatus === "string" ? newStatus.trim() : "";
     const normalizedDueDate = normalizeDueDate(newDueDate);
+    let cleanStatus = typeof newStatus === "string" ? newStatus.trim() : "";
 
     if (cleanProjectId === "") {
       return {
@@ -31,10 +30,6 @@ const createParentManager = () => {
       };
     }
 
-    if (cleanStatus !== "complete" && cleanStatus !== "incomplete") {
-      cleanStatus = "incomplete";
-    }
-
     if (!normalizedDueDate.success) {
       return {
         success: false,
@@ -42,8 +37,12 @@ const createParentManager = () => {
       };
     }
 
+    if (cleanStatus !== "complete" && cleanStatus !== "incomplete") {
+      cleanStatus = "incomplete";
+    }
+
     const newParent = parent();
-    newParent.create(cleanProjectId, cleanTitle, cleanDescription, cleanStatus, normalizedDueDate.date);
+    newParent.create(cleanProjectId, cleanTitle, cleanDescription, normalizedDueDate.date, cleanStatus);
     parentList.push(newParent);
     return { success: true, parentData: newParent.getData() };
   };
@@ -60,8 +59,8 @@ const createParentManager = () => {
     const cleanProjectId = typeof parsedData.projectId === "string" ? parsedData.projectId.trim() : "";
     const cleanTitle = typeof parsedData.title === "string" ? parsedData.title.trim() : "";
     const cleanDescription = typeof parsedData.description === "string" ? parsedData.description.trim() : "";
-    let cleanStatus = typeof parsedData.status === "string" ? parsedData.status.trim() : "";
     const normalizedDueDate = normalizeDueDate(parsedData.dueDate);
+    let cleanStatus = typeof parsedData.status === "string" ? parsedData.status.trim() : "";
 
     if (cleanId === "") {
       return {
@@ -84,15 +83,15 @@ const createParentManager = () => {
       };
     }
 
-    if (cleanStatus !== "complete" && cleanStatus !== "incomplete") {
-      cleanStatus = "incomplete";
-    }
-
     if (!normalizedDueDate.success) {
       return {
         success: false,
         reason: normalizedDueDate.reason,
       };
+    }
+
+    if (cleanStatus !== "complete" && cleanStatus !== "incomplete") {
+      cleanStatus = "incomplete";
     }
 
     if (parentExists(cleanId)) {
@@ -105,11 +104,11 @@ const createParentManager = () => {
     const restoredParent = parent();
     restoredParent.hydrate({
       id: cleanId,
-      title: cleanTitle,
       projectId: cleanProjectId,
+      title: cleanTitle,
       description: cleanDescription,
-      status: cleanStatus,
       dueDate: normalizedDueDate.date,
+      status: cleanStatus,
     });
 
     parentList.push(restoredParent);

@@ -6,7 +6,7 @@ const atomic = () => {
   let dueDate = "";
   let status = "";
 
-  const create = (newParentId, newTask, newStatus = "incomplete", newDueDate) => {
+  const create = (newParentId, newTask, newDueDate, newStatus = "incomplete") => {
     id = crypto.randomUUID();
     parentId = newParentId;
     task = newTask;

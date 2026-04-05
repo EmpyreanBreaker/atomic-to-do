@@ -84,8 +84,8 @@ const createParentService = () => {
     }
   };
 
-  const createParent = (newProjectId, newTitle, newDescription, newStatus, newDueDate) => {
-    const created = parentManager.addParent(newProjectId, newTitle, newDescription, newStatus, newDueDate);
+  const createParent = (newProjectId, newTitle, newDescription, newDueDate, newStatus) => {
+    const created = parentManager.addParent(newProjectId, newTitle, newDescription, newDueDate, newStatus);
     if (created.success) {
       toDoRepository.save("parents", parentManager.createSnapshot());
     } else {
@@ -103,16 +103,16 @@ const createParentService = () => {
       "bf913988-69e8-4a6b-9625-544141de2a83",
       "Clean kitchen",
       "Wipe counters, sweep floor, and take out trash",
-      "Not Started",
       "2026-04-06",
+      "Not Started",
     );
 
     createParent(
       "bf913988-69e8-4a6b-9625-544141de2a83",
       "Laundry",
       "Wash, dry, and fold clothes",
-      "In Progress",
       "2026-04-07",
+      "In Progress",
     );
 
     // Career
@@ -120,16 +120,16 @@ const createParentService = () => {
       "858577d7-8efb-4302-9149-1b0708d7163c",
       "Update resume",
       "Revise experience section and add recent project work",
-      "Not Started",
       "2026-04-10",
+      "Not Started",
     );
 
     createParent(
       "858577d7-8efb-4302-9149-1b0708d7163c",
       "Study Maximo workflows",
       "Review launch points, actions, and workflow basics",
-      "In Progress",
       "2026-04-12",
+      "In Progress",
     );
 
     // Relationship
@@ -137,16 +137,17 @@ const createParentService = () => {
       "150b3839-519b-4c5a-a654-c604e2bc1f23",
       "Plan date night",
       "Pick restaurant and confirm time",
-      "Not Started",
       "2026-04-08",
+
+      "Not Started",
     );
 
     createParent(
       "150b3839-519b-4c5a-a654-c604e2bc1f23",
       "Call family",
       "Catch up and check in for the week",
-      "Complete",
       "2026-04-05",
+      "Complete",
     );
 
     // Education
@@ -154,16 +155,16 @@ const createParentService = () => {
       "1b1ea0af-acee-4c93-8de0-4b9c43d4d5a1",
       "Read SQL notes",
       "Review joins, EXISTS, and subqueries",
-      "In Progress",
       "2026-04-09",
+      "In Progress",
     );
 
     createParent(
       "1b1ea0af-acee-4c93-8de0-4b9c43d4d5a1",
       "Practice JavaScript closures",
       "Do 3 closure and factory function exercises",
-      "Not Started",
       "2026-04-11",
+      "Not Started",
     );
   };
 
