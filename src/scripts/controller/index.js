@@ -47,7 +47,7 @@ import { projectService } from "../service/project-service";
   // parentService.changeParentStatus("8b7116db-a247-4c78-a3af-6e686486c5f4");
   // Original: Clean kitchen
   // parentService.changeParentTitle("8b7116db-a247-4c78-a3af-6e686486c5f4", "Thoroughly clean the kitchen");
-  parentService.testParentDisplay();
+  // parentService.testParentDisplay();
   // =================================
   // ATOMIC READ & LOAD STORAGE
   // =================================
@@ -60,5 +60,14 @@ import { projectService } from "../service/project-service";
   // Otherwise creation causes duplicate data
   // Because each run makes a new parentId due to crypto.randomUID()
   // This will not be a problem with UI creation since creation will be temporary
+  atomicService.testAtomicDisplay();
+  // Original: 2026-04-05
+  // atomicService.changeAtomicDueDate("a3ecb0f8-1932-48fb-95ac-87db5da0d8cd", "2027-05-06");
+  // Original: a8f3eac8-2b3c-4ab1-a7c7-c971c43909c8
+  // atomicService.changeAtomicParentId("a3ecb0f8-1932-48fb-95ac-87db5da0d8cd", "a8f3eac8-2b3c-4ab1-a7c7-c971c43909c8");
+  // Original: Complete
+  // atomicService.changeAtomicStatus("a3ecb0f8-1932-48fb-95ac-87db5da0d8cd");
+  // Original: Choose restaurant
+  // atomicService.changeAtomicTask("d7fbcbbc-3cff-4e19-a7f9-c85f54c80049", "Choose restaruant in the Dallas area");
   atomicService.testAtomicDisplay();
 })();
