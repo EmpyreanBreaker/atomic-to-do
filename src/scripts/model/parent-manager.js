@@ -370,6 +370,45 @@ const createParentManager = () => {
     return parentList.some((parent) => parent.getId() === id);
   };
 
+  const reassignParentsToProject = (fromProjectId, toProjectId) => {
+    const cleanFromProjectId = typeof fromProjectId === "string" ? fromProjectId.trim() : "";
+    const cleanToProjectId = typeof toProjectId === "string" ? toProjectId.trim() : "";
+    let changed = 0;
+
+    if (cleanFromProjectId === "") {
+      return {
+        success: false,
+        reason: `Invalid Current Project Id - From Project id must be a nonblank string!`,
+      };
+    }
+
+    if (cleanToProjectId === "") {
+      return {
+        success: false,
+        reason: `Invalid New Project Id - To Project id must be a nonblank string!`,
+      };
+    }
+
+    if (cleanFromProjectId === cleanToProjectId) {
+      return {
+        success: false,
+        reason: `No Change - From Project Id and To Project Id are identical!`,
+      };
+    }
+
+    for (let i = 0; i < parentList.length; i++) {
+      const parent = parentList[i];
+      const parentProjectId = parent.getProjectId();
+
+      if (parentProjectId === cleanFromProjectId) {
+        parent.setProjectId(cleanToProjectId);
+        changed += 1;
+      }
+    }
+
+    return { success: true, changed };
+  };
+
   const removeParent = (id) => {
     // TODO
   };
@@ -387,6 +426,7 @@ const createParentManager = () => {
     changeParentProjectId,
     changeParentTitle,
     createSnapshot,
+    reassignParentsToProject,
     reset,
   };
 };

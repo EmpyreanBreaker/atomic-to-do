@@ -117,30 +117,66 @@ const createProjectManager = () => {
     return { success: true, name: targetProject.getName() };
   };
 
+  const createSnapshot = () => {
+    return projectList.map((project) => project.getData());
+  };
+
   const findProjectByName = (cleanName) => {
     return projectList.find((project) => project.getName() === cleanName);
   };
 
-  const getProjectByName = (name) => {
+  const getDefaultProjectId = () => {
+    const defaultProject = projectList.find((project) => project.getName() === "All");
+
+    if (!defaultProject) {
+      return { success: false, reason: `Data Error - There is no default project in the Project List!` };
+    }
+
+    return { success: true, defaultProjectId: defaultProject.getId() };
+  };
+
+  const getProject = (name) => {
     const cleanName = normalizeName(name);
 
-    if (!cleanName) {
+    if (cleanName === "") {
       return {
         success: false,
         reason: `Invalid Project Name - Project names must be a string and not blank!`,
       };
     }
 
-    for (const project of projectList) {
-      if (project.getName() === cleanName) {
-        return { success: true, projectData: project.getData() };
-      }
+    const targetProject = projectList.find((project) => project.getName() === cleanName);
+
+    if (!targetProject) {
+      return {
+        success: false,
+        reason: `Non-existent Project - ${cleanName} is not a current project!`,
+      };
     }
 
-    return {
-      success: false,
-      reason: `Non-existent Project - ${cleanName} is not a current project!`,
-    };
+    return { success: true, projectData: targetProject.getData() };
+  };
+
+  const getProjectId = (name) => {
+    const cleanName = normalizeName(name);
+
+    if (cleanName === "") {
+      return {
+        success: false,
+        reason: `Invalid Project Name - Project names must be a string and not blank!`,
+      };
+    }
+
+    const targetProject = projectList.find((project) => project.getName() === cleanName);
+
+    if (!targetProject) {
+      return {
+        success: false,
+        reason: `Non-existent Project - ${cleanName} is not a current project!`,
+      };
+    }
+
+    return { success: true, projectId: targetProject.getId() };
   };
 
   const normalizeName = (name) => {
@@ -151,17 +187,49 @@ const createProjectManager = () => {
     return trimmedName.charAt(0).toUpperCase() + trimmedName.slice(1);
   };
 
-  const removeProject = (name) => {
-    // TODO
-  };
-
-  const createSnapshot = () => {
-    return projectList.map((project) => project.getData());
-  };
-
   // Checks if a project already exists in the manager array
   const projectNameExists = (cleanName) => {
     return projectList.some((project) => project.getName() === cleanName);
+  };
+
+  const removeProject = (name) => {
+    const cleanName = normalizeName(name);
+
+    // Refuse deletion if cleanName is invalid
+    if (cleanName === "") {
+      return {
+        success: false,
+        reason: `Invalid Project Name - Project names must be a string and not blank!`,
+      };
+    }
+
+    // Refuse deletion of default project
+    if (cleanName === "All") {
+      return {
+        success: false,
+        reason: `Default Project - ${cleanName} cannot be deleted!`,
+      };
+    }
+
+    for (let i = 0; i < projectList.length; i++) {
+      const targetProject = projectList[i];
+      const targetProjectName = targetProject.getName();
+      const targetProjectId = targetProject.getId();
+
+      if (targetProjectName === cleanName) {
+        projectList.splice(i, 1);
+        return {
+          success: true,
+          removedProjectId: targetProjectId,
+          defaultProjectId: getDefaultProjectId(),
+        };
+      }
+    }
+
+    return {
+      success: false,
+      reason: `Invalid Project Name - ${cleanName} does not exist in the project list!`,
+    };
   };
 
   const reset = () => {
@@ -173,7 +241,9 @@ const createProjectManager = () => {
     addHydratedProject,
     changeProjectName,
     createSnapshot,
-    getProjectByName,
+    getDefaultProjectId,
+    getProject,
+    getProjectId,
     removeProject, // TODO
     reset,
   };

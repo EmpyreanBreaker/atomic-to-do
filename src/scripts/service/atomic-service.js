@@ -2,30 +2,6 @@ import { toDoRepository } from "../repository/to-do-repository";
 import { atomicManager } from "../model/atomic-manager";
 
 const createAtomicService = () => {
-  const initializeAtomicAppData = () => {
-    if (!toDoRepository.exists("atomics")) {
-      console.log("Populating Default Atomic data Into Storage");
-      const initialAtomicData = atomicManager.createSnapshot();
-      toDoRepository.save("atomics", initialAtomicData);
-    }
-  };
-
-  const loadAtomicAppData = () => {
-    if (toDoRepository.exists("atomics")) {
-      const retrievedAtomics = toDoRepository.load("atomics");
-      atomicManager.reset();
-      // Testing only: if storage exists but is empty, seed default parent data once.
-      // After seeding, later reloads should hydrate from storage instead of creating again.
-      if (retrievedAtomics.length === 0) {
-        atomicServiceSeed();
-      } else {
-        retrievedAtomics.forEach((atomic) => {
-          atomicManager.addHydratedAtomic(atomic);
-        });
-      }
-    }
-  };
-
   const createAtomic = (newParentId, newTask, newDueDate, newStatus) => {
     const created = atomicManager.addAtomic(newParentId, newTask, newDueDate, newStatus);
     if (created.success) {
@@ -78,6 +54,34 @@ const createAtomicService = () => {
     } else {
       console.log(`${changed.reason}`);
       return { success: false, reason: changed.reason };
+    }
+  };
+
+  const getAtomics = () => {
+    return atomicManager.createSnapshot();
+  };
+
+  const initializeAtomicAppData = () => {
+    if (!toDoRepository.exists("atomics")) {
+      console.log("Populating Default Atomic data Into Storage");
+      const initialAtomicData = atomicManager.createSnapshot();
+      toDoRepository.save("atomics", initialAtomicData);
+    }
+  };
+
+  const loadAtomicAppData = () => {
+    if (toDoRepository.exists("atomics")) {
+      const retrievedAtomics = toDoRepository.load("atomics");
+      atomicManager.reset();
+      // Testing only: if storage exists but is empty, seed default parent data once.
+      // After seeding, later reloads should hydrate from storage instead of creating again.
+      if (retrievedAtomics.length === 0) {
+        atomicServiceSeed();
+      } else {
+        retrievedAtomics.forEach((atomic) => {
+          atomicManager.addHydratedAtomic(atomic);
+        });
+      }
     }
   };
 
@@ -158,19 +162,15 @@ const createAtomicService = () => {
     );
   };
 
-  const testAtomicDisplay = () => {
-    console.table(atomicManager.createSnapshot());
-  };
-
   return {
     changeAtomicDueDate,
     changeAtomicParentId,
     changeAtomicStatus,
     changeAtomicTask,
     createAtomic,
+    getAtomics,
     initializeAtomicAppData,
     loadAtomicAppData,
-    testAtomicDisplay,
   };
 };
 

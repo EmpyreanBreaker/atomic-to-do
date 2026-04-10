@@ -26,11 +26,6 @@ const project = () => {
     name = parsedData.name;
   };
 
-  const remove = () => {
-    id = null;
-    name = null;
-  };
-
   const setName = (newName) => {
     name = newName;
   };
@@ -42,7 +37,6 @@ const project = () => {
     getId,
     getName,
     hydrate,
-    remove,
     setName,
   };
 };

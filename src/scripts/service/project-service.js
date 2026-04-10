@@ -3,64 +3,130 @@ import { project } from "../model/project";
 import { projectManager } from "../model/project-manager";
 
 const createProjectService = () => {
-  const initializeProjectAppData = () => {
-    if (!toDoRepository.exists("projects")) {
-      console.log("Populating Default Project data Into Storage");
-
-      const defaultProject = project();
-      defaultProject.create("All");
-
-      toDoRepository.save("projects", [defaultProject.getData()]);
-    }
-  };
-
-  const loadProjectAppData = () => {
-    if (toDoRepository.exists("projects")) {
-      const retrievedProjects = toDoRepository.load("projects");
-      projectManager.reset();
-
-      retrievedProjects.forEach((project) => {
-        const hydrated = projectManager.addHydratedProject(project);
-        if (!hydrated.success) {
-          console.log(`${hydrated.reason}`);
-        }
-      });
-    }
-  };
-
   const changeProjectName = (currName, newName) => {
-    const changed = projectManager.changeProjectName(currName, newName);
-    if (changed.success) {
-      toDoRepository.save("projects", projectManager.createSnapshot());
-      return { success: true, name: changed.name };
-    } else {
-      console.log(`${changed.reason}`);
-      return { success: false, reason: changed.reason };
+    const changeResult = projectManager.changeProjectName(currName, newName);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
+
+    toDoRepository.save("projects", projectManager.createSnapshot());
+    return { success: true, name: changeResult.name };
   };
 
   const createProject = (newName) => {
-    const created = projectManager.addProject(newName);
-    if (created.success) {
-      toDoRepository.save("projects", projectManager.createSnapshot());
-      return { success: true, projectData: created.projectData };
-    } else {
-      console.log(`${created.reason}`);
-      return { success: false, reason: created.reason };
+    const createResult = projectManager.addProject(newName);
+
+    if (!createResult.success) {
+      return { success: false, reason: createResult.reason };
     }
+
+    toDoRepository.save("projects", projectManager.createSnapshot());
+    return { success: true, projectData: createResult.projectData };
   };
 
-  const testProjectDisplay = () => {
-    console.table(projectManager.createSnapshot());
+  const getDefaultProjectId = () => {
+    const retrievalResult = projectManager.getDefaultProjectId();
+
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
+    }
+
+    return { success: true, defaultProjectId: retrievalResult.defaultProjectId };
+  };
+
+  const getProject = (name) => {
+    const retrievalResult = projectManager.getProject(name);
+
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
+    }
+
+    return { success: true, projectData: retrievalResult.projectData };
+  };
+
+  const getProjectId = (name) => {
+    const retrievalResult = projectManager.getProjectId(name);
+
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
+    }
+
+    return { success: true, projectId: retrievalResult.projectId };
+  };
+
+  const getProjects = () => {
+    return projectManager.createSnapshot();
+  };
+
+  const initializeProjectAppData = () => {
+    if (toDoRepository.exists("projects")) {
+      return { success: true, initialized: false };
+    }
+
+    const defaultProject = project();
+    defaultProject.create("All");
+
+    toDoRepository.save("projects", [defaultProject.getData()]);
+    return { success: true, initialized: true };
+  };
+
+  const loadProjectAppData = () => {
+    if (!toDoRepository.exists("projects")) {
+      return { success: true, loaded: false, count: 0, failed: 0 };
+    }
+
+    const retrievedProjects = toDoRepository.load("projects");
+    const hydrationFailureList = [];
+    let failed = 0;
+
+    projectManager.reset();
+
+    retrievedProjects.forEach((project) => {
+      const hydrationResult = projectManager.addHydratedProject(project);
+
+      if (!hydrationResult.success) {
+        failed += 1;
+        hydrationFailureList.push(hydrationResult.reason);
+      }
+    });
+
+    return {
+      success: true,
+      loaded: true,
+      count: retrievedProjects.length,
+      failed,
+      hydrationFailureList,
+    };
+  };
+
+  const removeProject = (name) => {
+    const removalResult = projectManager.removeProject(name);
+
+    if (!removalResult.success) {
+      return { success: false, reason: removalResult.reason };
+    }
+
+    toDoRepository.save("projects", projectManager.createSnapshot());
+    return {
+      success: true,
+      removedProjectId: removalResult.removedProjectId,
+      defaultProjectId: removalResult.defaultProjectId,
+    };
   };
 
   return {
     changeProjectName,
     createProject,
+    getDefaultProjectId,
+    getProject,
+    getProjectId,
+    getProjects,
     initializeProjectAppData,
     loadProjectAppData,
-    testProjectDisplay,
+    removeProject,
   };
 };
+
 const projectService = createProjectService();
 export { projectService };
