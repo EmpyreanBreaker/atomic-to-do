@@ -3,93 +3,192 @@ import { parentManager } from "../model/parent-manager";
 
 const createParentService = () => {
   const changeParentDescription = (id, newDescription) => {
-    const changed = parentManager.changeParentDescription(id, newDescription);
-    if (changed.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, description: changed.description };
+    const changeResult = parentManager.changeParentDescription(id, newDescription);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
-    return { success: false, reason: changed.reason };
+
+    toDoRepository.save("parents", createParentListSnapshot());
+    return { success: true, description: changeResult.description };
   };
 
   const changeParentDueDate = (id, newDueDate) => {
-    const changed = parentManager.changeParentDueDate(id, newDueDate);
-    if (changed.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, dueDate: changed.dueDate };
+    const changeResult = parentManager.changeParentDueDate(id, newDueDate);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
-    return { success: false, reason: changed.reason };
+
+    toDoRepository.save("parents", createParentListSnapshot());
+    return { success: true, dueDate: changeResult.dueDate };
   };
 
   const changeParentProjectId = (id, newProjectId) => {
-    const changed = parentManager.changeParentProjectId(id, newProjectId);
-    if (changed.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, projectId: changed.projectId };
+    const changeResult = parentManager.changeParentProjectId(id, newProjectId);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
-    return { success: false, reason: changed.reason };
+
+    toDoRepository.save("parents", createParentListSnapshot());
+    return { success: true, projectId: changeResult.projectId };
   };
 
   const changeParentStatus = (id) => {
-    const changed = parentManager.changeParentStatus(id);
-    if (changed.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, status: changed.status };
+    const changeResult = parentManager.changeParentStatus(id);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
-    return { success: false, reason: changed.reason };
+
+    toDoRepository.save("parents", createParentListSnapshot());
+    return { success: true, status: changeResult.status };
   };
 
   const changeParentTitle = (id, newTitle) => {
-    const changed = parentManager.changeParentTitle(id, newTitle);
-    if (changed.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, title: changed.title };
+    const changeResult = parentManager.changeParentTitle(id, newTitle);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
-    return { success: false, reason: changed.reason };
+
+    toDoRepository.save("parents", createParentListSnapshot());
+    return { success: true, title: changeResult.title };
   };
 
   const createParent = (newProjectId, newTitle, newDescription, newDueDate, newStatus) => {
-    const created = parentManager.addParent(newProjectId, newTitle, newDescription, newDueDate, newStatus);
-    if (created.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, parentData: created.parentData };
+    const createResult = parentManager.addParent(
+      newProjectId,
+      newTitle,
+      newDescription,
+      newDueDate,
+      newStatus,
+    );
+
+    if (!createResult.success) {
+      return { success: false, reason: createResult.reason };
     }
-    return { success: false, reason: created.reason };
+
+    toDoRepository.save("parents", createParentListSnapshot());
+    return { success: true, parentData: createResult.parentData };
   };
 
-  const getParents = () => {
+  const createParentListSnapshot = () => {
     return parentManager.createSnapshot();
   };
 
-  const initializeParentAppData = () => {
-    if (!toDoRepository.exists("parents")) {
-      const initialParentData = parentManager.createSnapshot();
-      toDoRepository.save("parents", initialParentData);
+  const getParent = (id) => {
+    const retrievalResult = parentManager.getParent(id);
+
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
     }
+
+    return { success: true, parentData: retrievalResult.parentData };
+  };
+
+  const getParentIdsByProjectId = (projectId) => {
+    const retrievalResult = parentManager.getParentIdsByProjectId(projectId);
+
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
+    }
+
+    return { success: true, targetParentIdsList: retrievalResult.targetParentIdsList };
+  };
+
+  const initializeParentAppData = () => {
+    if (toDoRepository.exists("parents")) {
+      return { success: true, initialized: false };
+    }
+
+    const initialParentData = createParentListSnapshot();
+    toDoRepository.save("parents", initialParentData);
+
+    return {
+      success: true,
+      initialized: true,
+      count: initialParentData.length,
+    };
   };
 
   const loadParentAppData = () => {
-    if (toDoRepository.exists("parents")) {
-      const retrievedParents = toDoRepository.load("parents");
-      parentManager.reset();
-      // Testing only: if storage exists but is empty, seed default parent data once.
-      // After seeding, later reloads should hydrate from storage instead of creating again.
-      if (retrievedParents.length === 0) {
-        parentServiceSeed();
-      } else {
-        retrievedParents.forEach((parent) => {
-          parentManager.addHydratedParent(parent);
-        });
-      }
+    if (!toDoRepository.exists("parents")) {
+      return { success: true, loaded: false, seeded: false, count: 0, failed: 0 };
     }
+
+    const retrievedParents = toDoRepository.load("parents");
+    const hydrationFailureList = [];
+    let failed = 0;
+    let seeded = false;
+
+    parentManager.reset();
+
+    if (retrievedParents.length === 0) {
+      parentServiceSeed();
+      seeded = true;
+
+      return {
+        success: true,
+        loaded: true,
+        seeded,
+        count: 0,
+        failed: 0,
+        hydrationFailureList,
+      };
+    }
+
+    retrievedParents.forEach((parent) => {
+      const hydrationResult = parentManager.addHydratedParent(parent);
+
+      if (!hydrationResult.success) {
+        failed += 1;
+        hydrationFailureList.push(hydrationResult.reason);
+      }
+    });
+
+    return {
+      success: true,
+      loaded: true,
+      seeded,
+      count: retrievedParents.length,
+      failed,
+      hydrationFailureList,
+    };
   };
 
   const reassignParentsToProject = (currProjectId, newProjectId) => {
-    const reassigned = parentManager.reassignParentsToProject(currProjectId, newProjectId);
-    if (reassigned.success) {
-      toDoRepository.save("parents", parentManager.createSnapshot());
-      return { success: true, changed: reassigned.changed };
+    const reassignResult = parentManager.reassignParentsToProject(currProjectId, newProjectId);
+
+    if (!reassignResult.success) {
+      return { success: false, reason: reassignResult.reason };
     }
-    return { success: false, reason: reassigned.reason };
+
+    return { success: true, changed: reassignResult.changed };
+  };
+
+  const removeParent = (id) => {
+    const removalResult = parentManager.removeParent(id);
+
+    if (!removalResult.success) {
+      return { success: false, reason: removalResult.reason };
+    }
+
+    return {
+      success: true,
+      removedParentId: removalResult.removedParentId,
+    };
+  };
+
+  const removeParentsOfProject = (projectId) => {
+    const removalResult = parentManager.removeParentsOfProject(projectId);
+
+    if (!removalResult.success) {
+      return { success: false, reason: removalResult.reason };
+    }
+
+    return { success: true, removed: removalResult.removed };
   };
 
   const parentServiceSeed = () => {
@@ -133,7 +232,6 @@ const createParentService = () => {
       "Plan date night",
       "Pick restaurant and confirm time",
       "2026-04-08",
-
       "Not Started",
     );
 
@@ -170,11 +268,16 @@ const createParentService = () => {
     changeParentStatus,
     changeParentTitle,
     createParent,
-    getParents,
+    createParentListSnapshot,
+    getParent,
+    getParentIdsByProjectId,
     initializeParentAppData,
     loadParentAppData,
     reassignParentsToProject,
+    removeParentsOfProject,
+    removeParent,
   };
 };
+
 const parentService = createParentService();
 export { parentService };

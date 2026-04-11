@@ -221,7 +221,6 @@ const createProjectManager = () => {
         return {
           success: true,
           removedProjectId: targetProjectId,
-          defaultProjectId: getDefaultProjectId(),
         };
       }
     }
@@ -244,7 +243,7 @@ const createProjectManager = () => {
     getDefaultProjectId,
     getProject,
     getProjectId,
-    removeProject, // TODO
+    removeProject,
     reset,
   };
 };

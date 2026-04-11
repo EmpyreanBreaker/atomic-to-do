@@ -342,6 +342,29 @@ const createAtomicManager = () => {
     // TODO
   };
 
+  const removeAtomicsOfParent = (parentId) => {
+    const cleanParentId = typeof parentId === "string" ? parentId.trim() : "";
+    let removed = 0;
+
+    if (cleanParentId === "") {
+      return {
+        success: false,
+        reason: `Invalid Parent Id - Parent id must be a nonblank string!`,
+      };
+    }
+
+    for (let i = atomicList.length - 1; i >= 0; i--) {
+      const targetAtomic = atomicList[i];
+
+      if (targetAtomic.getParentId() === cleanParentId) {
+        atomicList.splice(i, 1);
+        removed += 1;
+      }
+    }
+
+    return { success: true, removed: removed };
+  };
+
   const reset = () => {
     atomicList.length = 0;
   };
@@ -354,6 +377,7 @@ const createAtomicManager = () => {
     changeAtomicStatus,
     changeAtomicTask,
     createSnapshot,
+    removeAtomicsOfParent,
     reset,
   };
 };

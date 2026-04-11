@@ -19,6 +19,6 @@ import { projectService } from "../service/project-service";
   // DELETION
   // =================================
 
-  console.table(projectService.getProjects());
-  console.table(parentService.getParents());
+  console.table(projectService.createProjectListSnapshot());
+  console.table(parentService.createParentListSnapshot());
 })();

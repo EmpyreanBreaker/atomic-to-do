@@ -94,7 +94,7 @@ const createParentManager = () => {
       cleanStatus = "incomplete";
     }
 
-    if (parentExists(cleanId)) {
+    if (findParentById(cleanId)) {
       return {
         success: false,
         reason: `Data Error - Parent id [${cleanId}] already exists in parent list!`,
@@ -259,8 +259,51 @@ const createParentManager = () => {
     return parentList.map((parent) => parent.getData());
   };
 
-  const findParentById = (id) => {
-    return parentList.find((parent) => parent.getId() === id);
+  const getParent = (id) => {
+    const cleanId = typeof id === "string" ? id.trim() : "";
+
+    if (cleanId === "") {
+      return {
+        success: false,
+        reason: `Invalid Parent Id - Parent Id must be a nonblank string!`,
+      };
+    }
+
+    const targetParent = findParentById(cleanId);
+
+    if (!targetParent) {
+      return {
+        success: false,
+        reason: `Invalid Parent Id - Parent id [${cleanId}] does not exist in parent list!`,
+      };
+    }
+
+    return { success: true, parentData: targetParent.getData() };
+  };
+
+  const getParentIdsByProjectId = (projectId) => {
+    const cleanProjectId = typeof projectId === "string" ? projectId.trim() : "";
+
+    if (cleanProjectId === "") {
+      return {
+        success: false,
+        reason: `Invalid Project Id - Project Id must be a nonblank string!`,
+      };
+    }
+
+    const targetParentIdsList = [];
+
+    parentList.forEach((parent) => {
+      if (parent.getProjectId() === cleanProjectId) {
+        targetParentIdsList.push(parent.getId());
+      }
+    });
+
+    return { success: true, targetParentIdsList: targetParentIdsList };
+  };
+
+  const findParentById = (cleanId) => {
+    return parentList.find((parent) => parent.getId() === cleanId);
   };
 
   const normalizeDueDate = (dueDate) => {
@@ -365,11 +408,6 @@ const createParentManager = () => {
     };
   };
 
-  // Checks if a parent already exists in the manager array
-  const parentExists = (id) => {
-    return parentList.some((parent) => parent.getId() === id);
-  };
-
   const reassignParentsToProject = (fromProjectId, toProjectId) => {
     const cleanFromProjectId = typeof fromProjectId === "string" ? fromProjectId.trim() : "";
     const cleanToProjectId = typeof toProjectId === "string" ? toProjectId.trim() : "";
@@ -406,11 +444,59 @@ const createParentManager = () => {
       }
     }
 
-    return { success: true, changed };
+    return { success: true, changed: changed };
   };
 
   const removeParent = (id) => {
-    // TODO
+    const cleanId = typeof id === "string" ? id.trim() : "";
+
+    if (cleanId === "") {
+      return {
+        success: false,
+        reason: `Invalid Parent Id - Parent id must be a nonblank string!`,
+      };
+    }
+
+    for (let i = 0; i < parentList.length; i++) {
+      const targetParent = parentList[i];
+      const targetParentId = targetParent.getId();
+
+      if (targetParentId === cleanId) {
+        parentList.splice(i, 1);
+        return {
+          success: true,
+          removedParentId: targetParentId,
+        };
+      }
+    }
+
+    return {
+      success: false,
+      reason: `Invalid Parent Id - Parent id [${cleanId}] does not exist in parent list!`,
+    };
+  };
+
+  const removeParentsOfProject = (projectId) => {
+    const cleanProjectId = typeof projectId === "string" ? projectId.trim() : "";
+    let removed = 0;
+
+    if (cleanProjectId === "") {
+      return {
+        success: false,
+        reason: `Invalid Project Id - Project id must be a nonblank string!`,
+      };
+    }
+
+    for (let i = parentList.length - 1; i >= 0; i--) {
+      const targetParent = parentList[i];
+
+      if (targetParent.getProjectId() === cleanProjectId) {
+        parentList.splice(i, 1);
+        removed += 1;
+      }
+    }
+
+    return { success: true, removed: removed };
   };
 
   const reset = () => {
@@ -426,8 +512,12 @@ const createParentManager = () => {
     changeParentProjectId,
     changeParentTitle,
     createSnapshot,
+    getParent,
+    getParentIdsByProjectId,
     reassignParentsToProject,
     reset,
+    removeParent,
+    removeParentsOfProject,
   };
 };
 const parentManager = createParentManager();

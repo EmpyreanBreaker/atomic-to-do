@@ -61,15 +61,6 @@ const parent = () => {
     status = parsedData.status;
   };
 
-  const remove = () => {
-    id = null;
-    projectId = null;
-    title = null;
-    description = null;
-    dueDate = null;
-    status = null;
-  };
-
   const setDescription = (newDescription) => {
     description = newDescription;
   };
@@ -100,7 +91,6 @@ const parent = () => {
     getStatus,
     getTitle,
     hydrate,
-    remove,
     setDescription,
     setDueDate,
     setProjectId,

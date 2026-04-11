@@ -5,7 +5,7 @@ const createAtomicService = () => {
   const createAtomic = (newParentId, newTask, newDueDate, newStatus) => {
     const created = atomicManager.addAtomic(newParentId, newTask, newDueDate, newStatus);
     if (created.success) {
-      toDoRepository.save("atomics", atomicManager.createSnapshot());
+      toDoRepository.save("atomics", createAtomicListSnapshot());
       return { success: true, atomicData: created.atomicData };
     } else {
       console.log(`${created.reason}`);
@@ -16,7 +16,7 @@ const createAtomicService = () => {
   const changeAtomicDueDate = (id, newDueDate) => {
     const changed = atomicManager.changeAtomicDueDate(id, newDueDate);
     if (changed.success) {
-      toDoRepository.save("atomics", atomicManager.createSnapshot());
+      toDoRepository.save("atomics", createAtomicListSnapshot());
       return { success: true, dueDate: changed.dueDate };
     } else {
       console.log(`${changed.reason}`);
@@ -27,7 +27,7 @@ const createAtomicService = () => {
   const changeAtomicParentId = (id, newParentId) => {
     const changed = atomicManager.changeAtomicParentId(id, newParentId);
     if (changed.success) {
-      toDoRepository.save("atomics", atomicManager.createSnapshot());
+      toDoRepository.save("atomics", createAtomicListSnapshot());
       return { success: true, parentId: changed.parentId };
     } else {
       console.log(`${changed.reason}`);
@@ -38,7 +38,7 @@ const createAtomicService = () => {
   const changeAtomicStatus = (id) => {
     const changed = atomicManager.changeAtomicStatus(id);
     if (changed.success) {
-      toDoRepository.save("atomics", atomicManager.createSnapshot());
+      toDoRepository.save("atomics", createAtomicListSnapshot());
       return { success: true, status: changed.status };
     } else {
       console.log(`${changed.reason}`);
@@ -49,7 +49,7 @@ const createAtomicService = () => {
   const changeAtomicTask = (id, newTask) => {
     const changed = atomicManager.changeAtomicTask(id, newTask);
     if (changed.success) {
-      toDoRepository.save("atomics", atomicManager.createSnapshot());
+      toDoRepository.save("atomics", createAtomicListSnapshot());
       return { success: true, title: changed.title };
     } else {
       console.log(`${changed.reason}`);
@@ -57,14 +57,14 @@ const createAtomicService = () => {
     }
   };
 
-  const getAtomics = () => {
+  const createAtomicListSnapshot = () => {
     return atomicManager.createSnapshot();
   };
 
   const initializeAtomicAppData = () => {
     if (!toDoRepository.exists("atomics")) {
       console.log("Populating Default Atomic data Into Storage");
-      const initialAtomicData = atomicManager.createSnapshot();
+      const initialAtomicData = createAtomicListSnapshot();
       toDoRepository.save("atomics", initialAtomicData);
     }
   };
@@ -83,6 +83,16 @@ const createAtomicService = () => {
         });
       }
     }
+  };
+
+  const removeAtomicsOfParent = (parentId) => {
+    const removalResult = atomicManager.removeAtomicsOfParent(parentId);
+
+    if (!removalResult.success) {
+      return { success: false, reason: removalResult.reason };
+    }
+
+    return { success: true, removed: removalResult.removed };
   };
 
   const atomicServiceSeed = () => {
@@ -168,9 +178,10 @@ const createAtomicService = () => {
     changeAtomicStatus,
     changeAtomicTask,
     createAtomic,
-    getAtomics,
+    createAtomicListSnapshot,
     initializeAtomicAppData,
     loadAtomicAppData,
+    removeAtomicsOfParent,
   };
 };
 

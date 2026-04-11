@@ -10,7 +10,7 @@ const createProjectService = () => {
       return { success: false, reason: changeResult.reason };
     }
 
-    toDoRepository.save("projects", projectManager.createSnapshot());
+    toDoRepository.save("projects", createProjectListSnapshot());
     return { success: true, name: changeResult.name };
   };
 
@@ -21,8 +21,12 @@ const createProjectService = () => {
       return { success: false, reason: createResult.reason };
     }
 
-    toDoRepository.save("projects", projectManager.createSnapshot());
+    toDoRepository.save("projects", createProjectListSnapshot());
     return { success: true, projectData: createResult.projectData };
+  };
+
+  const createProjectListSnapshot = () => {
+    return projectManager.createSnapshot();
   };
 
   const getDefaultProjectId = () => {
@@ -53,10 +57,6 @@ const createProjectService = () => {
     }
 
     return { success: true, projectId: retrievalResult.projectId };
-  };
-
-  const getProjects = () => {
-    return projectManager.createSnapshot();
   };
 
   const initializeProjectAppData = () => {
@@ -106,22 +106,20 @@ const createProjectService = () => {
     if (!removalResult.success) {
       return { success: false, reason: removalResult.reason };
     }
-
-    toDoRepository.save("projects", projectManager.createSnapshot());
+    
     return {
       success: true,
       removedProjectId: removalResult.removedProjectId,
-      defaultProjectId: removalResult.defaultProjectId,
     };
   };
 
   return {
     changeProjectName,
     createProject,
+    createProjectListSnapshot,
     getDefaultProjectId,
     getProject,
     getProjectId,
-    getProjects,
     initializeProjectAppData,
     loadProjectAppData,
     removeProject,
