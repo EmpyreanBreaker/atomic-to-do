@@ -339,7 +339,33 @@ const createAtomicManager = () => {
   };
 
   const removeAtomic = (id) => {
-    // TODO
+    const cleanId = typeof id === "string" ? id.trim() : "";
+
+    if (cleanId === "") {
+      return {
+        success: false,
+        reason: `Invalid Atomic Id - Atomic id must be a nonblank string!`,
+      };
+    }
+
+    for (let i = 0; i < atomicList.length; i++) {
+      const targetAtomic = atomicList[i];
+      const targetAtomicId = targetAtomic.getId();
+
+      if (targetAtomicId === cleanId) {
+        atomicList.splice(i, 1);
+
+        return {
+          success: true,
+          removedAtomicId: targetAtomicId,
+        };
+      }
+    }
+
+    return {
+      success: false,
+      reason: `Invalid Atomic Id - Atomic id [${cleanId}] does not exist in atomic list!`,
+    };
   };
 
   const removeAtomicsOfParent = (parentId) => {

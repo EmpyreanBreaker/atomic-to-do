@@ -3,58 +3,58 @@ import { atomicManager } from "../model/atomic-manager";
 
 const createAtomicService = () => {
   const createAtomic = (newParentId, newTask, newDueDate, newStatus) => {
-    const created = atomicManager.addAtomic(newParentId, newTask, newDueDate, newStatus);
-    if (created.success) {
-      toDoRepository.save("atomics", createAtomicListSnapshot());
-      return { success: true, atomicData: created.atomicData };
-    } else {
-      console.log(`${created.reason}`);
-      return { success: false, reason: created.reason };
+    const createResult = atomicManager.addAtomic(newParentId, newTask, newDueDate, newStatus);
+
+    if (!createResult.success) {
+      return { success: false, reason: createResult.reason };
     }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
+    return { success: true, atomicData: createResult.atomicData };
   };
 
   const changeAtomicDueDate = (id, newDueDate) => {
-    const changed = atomicManager.changeAtomicDueDate(id, newDueDate);
-    if (changed.success) {
-      toDoRepository.save("atomics", createAtomicListSnapshot());
-      return { success: true, dueDate: changed.dueDate };
-    } else {
-      console.log(`${changed.reason}`);
-      return { success: false, reason: changed.reason };
+    const changeResult = atomicManager.changeAtomicDueDate(id, newDueDate);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
+    return { success: true, dueDate: changeResult.dueDate };
   };
 
   const changeAtomicParentId = (id, newParentId) => {
-    const changed = atomicManager.changeAtomicParentId(id, newParentId);
-    if (changed.success) {
-      toDoRepository.save("atomics", createAtomicListSnapshot());
-      return { success: true, parentId: changed.parentId };
-    } else {
-      console.log(`${changed.reason}`);
-      return { success: false, reason: changed.reason };
+    const changeResult = atomicManager.changeAtomicParentId(id, newParentId);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
+    return { success: true, parentId: changeResult.parentId };
   };
 
   const changeAtomicStatus = (id) => {
-    const changed = atomicManager.changeAtomicStatus(id);
-    if (changed.success) {
-      toDoRepository.save("atomics", createAtomicListSnapshot());
-      return { success: true, status: changed.status };
-    } else {
-      console.log(`${changed.reason}`);
-      return { success: false, reason: changed.reason };
+    const changeResult = atomicManager.changeAtomicStatus(id);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
+    return { success: true, status: changeResult.status };
   };
 
   const changeAtomicTask = (id, newTask) => {
-    const changed = atomicManager.changeAtomicTask(id, newTask);
-    if (changed.success) {
-      toDoRepository.save("atomics", createAtomicListSnapshot());
-      return { success: true, title: changed.title };
-    } else {
-      console.log(`${changed.reason}`);
-      return { success: false, reason: changed.reason };
+    const changeResult = atomicManager.changeAtomicTask(id, newTask);
+
+    if (!changeResult.success) {
+      return { success: false, reason: changeResult.reason };
     }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
+    return { success: true, title: changeResult.title };
   };
 
   const createAtomicListSnapshot = () => {
@@ -62,27 +62,81 @@ const createAtomicService = () => {
   };
 
   const initializeAtomicAppData = () => {
-    if (!toDoRepository.exists("atomics")) {
-      console.log("Populating Default Atomic data Into Storage");
-      const initialAtomicData = createAtomicListSnapshot();
-      toDoRepository.save("atomics", initialAtomicData);
+    if (toDoRepository.exists("atomics")) {
+      return { success: true, initialized: false };
     }
+
+    console.log("Populating Default Atomic data Into Storage");
+    const initialAtomicData = createAtomicListSnapshot();
+    toDoRepository.save("atomics", initialAtomicData);
+
+    return {
+      success: true,
+      initialized: true,
+      count: initialAtomicData.length,
+    };
   };
 
   const loadAtomicAppData = () => {
-    if (toDoRepository.exists("atomics")) {
-      const retrievedAtomics = toDoRepository.load("atomics");
-      atomicManager.reset();
-      // Testing only: if storage exists but is empty, seed default parent data once.
-      // After seeding, later reloads should hydrate from storage instead of creating again.
-      if (retrievedAtomics.length === 0) {
-        atomicServiceSeed();
-      } else {
-        retrievedAtomics.forEach((atomic) => {
-          atomicManager.addHydratedAtomic(atomic);
-        });
-      }
+    if (!toDoRepository.exists("atomics")) {
+      return { success: true, loaded: false, seeded: false, count: 0, failed: 0 };
     }
+
+    const retrievedAtomics = toDoRepository.load("atomics");
+    const hydrationFailureList = [];
+    let failed = 0;
+    let seeded = false;
+
+    atomicManager.reset();
+
+    // Testing only: if storage exists but is empty, seed default atomic data once.
+    // After seeding, later reloads should hydrate from storage instead of creating again.
+    if (retrievedAtomics.length === 0) {
+      atomicServiceSeed();
+      seeded = true;
+
+      return {
+        success: true,
+        loaded: true,
+        seeded,
+        count: 0,
+        failed: 0,
+        hydrationFailureList,
+      };
+    }
+
+    retrievedAtomics.forEach((atomic) => {
+      const hydrationResult = atomicManager.addHydratedAtomic(atomic);
+
+      if (!hydrationResult.success) {
+        failed += 1;
+        hydrationFailureList.push(hydrationResult.reason);
+      }
+    });
+
+    return {
+      success: true,
+      loaded: true,
+      seeded,
+      count: retrievedAtomics.length,
+      failed,
+      hydrationFailureList,
+    };
+  };
+
+  const removeAtomic = (id) => {
+    const removalResult = atomicManager.removeAtomic(id);
+
+    if (!removalResult.success) {
+      return { success: false, reason: removalResult.reason };
+    }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
+
+    return {
+      success: true,
+      removedAtomicId: removalResult.removedAtomicId,
+    };
   };
 
   const removeAtomicsOfParent = (parentId) => {
@@ -91,6 +145,8 @@ const createAtomicService = () => {
     if (!removalResult.success) {
       return { success: false, reason: removalResult.reason };
     }
+
+    toDoRepository.save("atomics", createAtomicListSnapshot());
 
     return { success: true, removed: removalResult.removed };
   };
@@ -181,6 +237,7 @@ const createAtomicService = () => {
     createAtomicListSnapshot,
     initializeAtomicAppData,
     loadAtomicAppData,
+    removeAtomic,
     removeAtomicsOfParent,
   };
 };
