@@ -54,7 +54,7 @@ const createAtomicService = () => {
     }
 
     toDoRepository.save("atomics", createAtomicListSnapshot());
-    return { success: true, title: changeResult.title };
+    return { success: true, task: changeResult.task };
   };
 
   const createAtomicListSnapshot = () => {

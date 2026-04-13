@@ -1,4 +1,3 @@
-import { add } from "date-fns";
 import { atomic } from "./atomic.js";
 
 const createAtomicManager = () => {
@@ -38,6 +37,7 @@ const createAtomicManager = () => {
     const newAtomic = atomic();
     newAtomic.create(cleanParentId, cleanTask, normalizedDueDate.date, cleanStatus);
     atomicList.push(newAtomic);
+
     return { success: true, atomicData: newAtomic.getData() };
   };
 
@@ -65,7 +65,7 @@ const createAtomicManager = () => {
     if (cleanParentId === "") {
       return {
         success: false,
-        reason: `Data Error - Stored project id must be a nonblank string!`,
+        reason: `Data Error - Stored parent id must be a nonblank string!`,
       };
     }
 
@@ -107,12 +107,10 @@ const createAtomicManager = () => {
     return { success: true, atomicData: restoredAtomic.getData() };
   };
 
-  // Checks if an atomic object already exists in the manager array
   const atomicExists = (id) => {
     return atomicList.some((atomic) => atomic.getId() === id);
   };
 
-  // Users can leave blank due dates
   const changeAtomicDueDate = (id, newDueDate) => {
     const cleanId = typeof id === "string" ? id.trim() : "";
     const normalizedDueDate = normalizeDueDate(newDueDate);
@@ -132,6 +130,7 @@ const createAtomicManager = () => {
     }
 
     const targetAtomic = findAtomicById(cleanId);
+
     if (!targetAtomic) {
       return {
         success: false,
@@ -162,6 +161,7 @@ const createAtomicManager = () => {
     }
 
     const targetAtomic = findAtomicById(cleanId);
+
     if (!targetAtomic) {
       return {
         success: false,
@@ -179,11 +179,12 @@ const createAtomicManager = () => {
     if (cleanId === "") {
       return {
         success: false,
-        reason: `Invalid Atomid Id - Atomid id must be a nonblank string!`,
+        reason: `Invalid Atomic Id - Atomic id must be a nonblank string!`,
       };
     }
 
     const targetAtomic = findAtomicById(cleanId);
+
     if (!targetAtomic) {
       return {
         success: false,
@@ -191,9 +192,11 @@ const createAtomicManager = () => {
       };
     }
 
-    targetAtomic.getStatus() === "incomplete"
-      ? targetAtomic.setStatus("complete")
-      : targetAtomic.setStatus("incomplete");
+    if (targetAtomic.getStatus() === "incomplete") {
+      targetAtomic.setStatus("complete");
+    } else {
+      targetAtomic.setStatus("incomplete");
+    }
 
     return { success: true, status: targetAtomic.getStatus() };
   };
@@ -217,6 +220,7 @@ const createAtomicManager = () => {
     }
 
     const targetAtomic = findAtomicById(cleanId);
+
     if (!targetAtomic) {
       return {
         success: false,
@@ -388,7 +392,7 @@ const createAtomicManager = () => {
       }
     }
 
-    return { success: true, removed: removed };
+    return { success: true, removed };
   };
 
   const reset = () => {
@@ -403,9 +407,11 @@ const createAtomicManager = () => {
     changeAtomicStatus,
     changeAtomicTask,
     createSnapshot,
+    removeAtomic,
     removeAtomicsOfParent,
     reset,
   };
 };
+
 const atomicManager = createAtomicManager();
 export { atomicManager };

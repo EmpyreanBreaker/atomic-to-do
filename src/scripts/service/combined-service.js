@@ -4,18 +4,6 @@ import { parentService } from "../service/parent-service";
 import { projectService } from "../service/project-service";
 
 const createCombinedService = () => {
-  const initializeAppData = () => {
-    projectService.initializeProjectAppData();
-    parentService.initializeParentAppData();
-    atomicService.initializeAtomicAppData();
-  };
-
-  const loadAppData = () => {
-    projectService.loadProjectAppData();
-    parentService.loadParentAppData();
-    atomicService.loadAtomicAppData();
-  };
-
   // Will be used for Default Project - All in the UI
   const buildAllHierarchy = () => {
     // 1) Build Lookup Map:
@@ -121,24 +109,50 @@ const createCombinedService = () => {
     return allHierarchy;
   };
 
+  const initializeAppData = () => {
+    const projectInitializationResult = projectService.initializeProjectAppData();
+    const parentInitializationResult = parentService.initializeParentAppData();
+    const atomicInitializationResult = atomicService.initializeAtomicAppData();
+
+    return {
+      success: true,
+      projectInitializationResult,
+      parentInitializationResult,
+      atomicInitializationResult,
+    };
+  };
+
+  const loadAppData = () => {
+    const projectLoadResult = projectService.loadProjectAppData();
+    const parentLoadResult = parentService.loadParentAppData();
+    const atomicLoadResult = atomicService.loadAtomicAppData();
+
+    return {
+      success: true,
+      projectLoadResult,
+      parentLoadResult,
+      atomicLoadResult,
+    };
+  };
+
   // Remove parent, delete children, and save
   const removeParent = (parentId) => {
-    const retrieveParentResult = parentService.getParent(parentId);
+    const retrievalResult = parentService.getParent(parentId);
 
-    if (!retrieveParentResult.success) {
-      return { success: false, reason: retrieveParentResult.reason };
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
     }
 
-    const removeAtomicsResult = atomicService.removeAtomicsOfParent(parentId);
+    const atomicRemovalResult = atomicService.removeAtomicsOfParent(parentId);
 
-    if (!removeAtomicsResult.success) {
-      return { success: false, reason: removeAtomicsResult.reason };
+    if (!atomicRemovalResult.success) {
+      return { success: false, reason: atomicRemovalResult.reason };
     }
 
-    const removalResult = parentService.removeParent(parentId);
+    const parentRemovalResult = parentService.removeParent(parentId);
 
-    if (!removalResult.success) {
-      return { success: false, reason: removalResult.reason };
+    if (!parentRemovalResult.success) {
+      return { success: false, reason: parentRemovalResult.reason };
     }
 
     toDoRepository.save("atomics", atomicService.createAtomicListSnapshot());
@@ -146,47 +160,48 @@ const createCombinedService = () => {
 
     return {
       success: true,
-      removed: removeAtomicsResult.removed,
-      removedParentId: removalResult.removedParentId,
+      removed: atomicRemovalResult.removed,
+      removedParentId: parentRemovalResult.removedParentId,
     };
   };
 
   // Helper function
   // Remove parent. Delete children. Don't save
   const removeParentAndChildren = (parentId) => {
-    const retrieveParentResult = parentService.getParent(parentId);
+    const retrievalResult = parentService.getParent(parentId);
 
-    if (!retrieveParentResult.success) {
-      return { success: false, reason: retrieveParentResult.reason };
+    if (!retrievalResult.success) {
+      return { success: false, reason: retrievalResult.reason };
     }
 
-    const removeAtomicsResult = atomicService.removeAtomicsOfParent(parentId);
+    const atomicRemovalResult = atomicService.removeAtomicsOfParent(parentId);
 
-    if (!removeAtomicsResult.success) {
-      return { success: false, reason: removeAtomicsResult.reason };
+    if (!atomicRemovalResult.success) {
+      return { success: false, reason: atomicRemovalResult.reason };
     }
 
-    const removalResult = parentService.removeParent(parentId);
+    const parentRemovalResult = parentService.removeParent(parentId);
 
-    if (!removalResult.success) {
-      return { success: false, reason: removalResult.reason };
+    if (!parentRemovalResult.success) {
+      return { success: false, reason: parentRemovalResult.reason };
     }
 
     return {
       success: true,
-      removed: removeAtomicsResult.removed,
-      removedParentId: removalResult.removedParentId,
+      removed: atomicRemovalResult.removed,
+      removedParentId: parentRemovalResult.removedParentId,
     };
   };
 
   // Remove project and reassign children if any
   const removeProject = (name) => {
     const defaultProjectResult = projectService.getDefaultProjectId();
-    const targetProjectResult = projectService.getProjectId(name);
 
     if (!defaultProjectResult.success) {
       return { success: false, reason: defaultProjectResult.reason };
     }
+
+    const targetProjectResult = projectService.getProjectId(name);
 
     if (!targetProjectResult.success) {
       return { success: false, reason: targetProjectResult.reason };
@@ -207,13 +222,14 @@ const createCombinedService = () => {
       return { success: false, reason: removalResult.reason };
     }
 
-    toDoRepository.save("parents", createParentListSnapshot());
-    toDoRepository.save("projects", createProjectListSnapshot());
+    toDoRepository.save("parents", parentService.createParentListSnapshot());
+    toDoRepository.save("projects", projectService.createProjectListSnapshot());
 
     return {
       success: true,
       changed: reassignResult.changed,
       removedProjectId: removalResult.removedProjectId,
+      defaultProjectId,
     };
   };
 
@@ -226,13 +242,13 @@ const createCombinedService = () => {
     }
 
     const targetProjectId = targetProjectResult.projectId;
-    const targetParentIdsListRetrieval = parentService.getParentIdsByProjectId(targetProjectId);
+    const parentIdsRetrievalResult = parentService.getParentIdsByProjectId(targetProjectId);
 
-    if (!targetParentIdsListRetrieval.success) {
-      return { success: false, reason: targetParentIdsListRetrieval.reason };
+    if (!parentIdsRetrievalResult.success) {
+      return { success: false, reason: parentIdsRetrievalResult.reason };
     }
 
-    const targetParentIdsList = targetParentIdsListRetrieval.targetParentIdsList;
+    const targetParentIdsList = parentIdsRetrievalResult.targetParentIdsList;
 
     // Get a list of parents that have this projectId
     // Loop through them and call removeParent
@@ -247,18 +263,19 @@ const createCombinedService = () => {
       }
     }
 
-    const removeProjectResult = projectService.removeProject(name);
-    if (!removeProjectResult.success) {
-      return { success: false, reason: removeProjectResult.reason };
+    const projectRemovalResult = projectService.removeProject(name);
+
+    if (!projectRemovalResult.success) {
+      return { success: false, reason: projectRemovalResult.reason };
     }
 
-    toDoRepository.save("atomics", createAtomicListSnapshot());
-    toDoRepository.save("parents", createParentListSnapshot());
-    toDoRepository.save("projects", createProjectListSnapshot());
+    toDoRepository.save("atomics", atomicService.createAtomicListSnapshot());
+    toDoRepository.save("parents", parentService.createParentListSnapshot());
+    toDoRepository.save("projects", projectService.createProjectListSnapshot());
 
     return {
       success: true,
-      removedProjectId: removeProjectResult.removedProjectId,
+      removedProjectId: projectRemovalResult.removedProjectId,
     };
   };
 
