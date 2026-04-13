@@ -1,0 +1,31 @@
+.site {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 1fr 8fr 1fr;
+  grid-template-columns: 2fr 8fr;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer footer";
+}
+
+.header {
+  border: 1px solid red;
+  grid-area: header;
+}
+
+.aside {
+  border: 1px solid blue;
+  grid-area: sidebar;
+}
+
+.main {
+  border: 1px solid green;
+  grid-area: main;
+}
+
+.footer {
+  border: 1px solid black;
+  grid-area: footer;
+}

@@ -106,7 +106,7 @@ const createProjectService = () => {
     if (!removalResult.success) {
       return { success: false, reason: removalResult.reason };
     }
-    
+
     return {
       success: true,
       removedProjectId: removalResult.removedProjectId,

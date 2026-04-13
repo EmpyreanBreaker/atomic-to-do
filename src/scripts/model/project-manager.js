@@ -129,7 +129,10 @@ const createProjectManager = () => {
     const defaultProject = projectList.find((project) => project.getName() === "All");
 
     if (!defaultProject) {
-      return { success: false, reason: `Data Error - There is no default project in the Project List!` };
+      return {
+        success: false,
+        reason: `Data Error - There is no default project in the Project List!`,
+      };
     }
 
     return { success: true, defaultProjectId: defaultProject.getId() };

@@ -1,0 +1,21 @@
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ HOME                                                          [+ New Parent]│
+├──────────────────────────────────────────────────────────────────────────────┤
+│ PARENT: Clean kitchen                                            [Incomplete]│
+│ Description: Wipe counters, sweep floor, and take out trash                  │
+│ Due: 2026-04-06                                                             │
+│                                                                              │
+│   [x] Clear counters                                      Due: 2026-04-05   │
+│   [ ] Sweep floor                                        Due: 2026-04-06   │
+│                                                                              │
+│   [Edit] [Add Atomic] [Delete]                                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ PARENT: Laundry                                                  [In Progress]│
+│ Description: Wash, dry, and fold clothes                                      │
+│ Due: 2026-04-07                                                               │
+│                                                                              │
+│   [x] Wash clothes                                        Due: 2026-04-06   │
+│   [ ] Fold clothes                                        Due: 2026-04-07   │
+│                                                                              │
+│   [Edit] [Add Atomic] [Delete]                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
