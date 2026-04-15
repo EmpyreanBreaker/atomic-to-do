@@ -1,9 +1,17 @@
 import "../../css/reset.css";
 import "../../css/styles.css";
-import "../../css/index.css"
-import { atomicService } from "../service/atomic-service";
+import "../../css/index.css";
 import { combinedService } from "../service/combined-service";
-import { parentService } from "../service/parent-service";
-import { projectService } from "../service/project-service";
+import { asideFunctions, navigation } from "./aside";
+import { displayProjectInMain } from "./main";
 
-(() => {})();
+(() => {
+  // =================================
+  // COMBINED READ & LOAD STORAGE
+  // =================================
+  combinedService.initializeAppData();
+  combinedService.loadAppData();
+  combinedService.displayAllHierarchy();
+  asideFunctions();
+  navigation(displayProjectInMain);
+})();

@@ -1,112 +1,98 @@
+import { project } from "../model/project";
 import { toDoRepository } from "../repository/to-do-repository";
 import { atomicService } from "../service/atomic-service";
 import { parentService } from "../service/parent-service";
 import { projectService } from "../service/project-service";
 
 const createCombinedService = () => {
-  // Will be used for Default Project - All in the UI
   const buildAllHierarchy = () => {
-    // 1) Build Lookup Map:
-    // Map<
-    //   ProjectId,
-    //   {
-    //     project: ProjectData,
-    //     parents: Map<
-    //       ParentId,
-    //       {
-    //         parent: ParentData,
-    //         atomics: AtomicData[]
-    //       }
-    //     >
-    //   }
-    // >
-    const allHierarchy = new Map();
-
-    // Extra lookup map so atomics can find parents directly by parentId
-    const parentLookup = new Map();
-
+    // Get every available data point
     const projects = projectService.createProjectListSnapshot();
     const parents = parentService.createParentListSnapshot();
     const atomics = atomicService.createAtomicListSnapshot();
 
-    // 2) Seed every project first so projects with 0 parents still show up
+    // allHierarchy: Map where each project id points to that project's hierarchy bucket.
+    const allHierarchy = new Map();
+
+    // First pass: initialize allHierarchy so every project gets an entry, even if it has no parents yet.
+    // allHierarchy: Map where each project id points to that project’s hierarchy bucket.
+    // Key = project.id
+    // Value = object containing: {
+    //   project: full project snapshot object,
+    //   parents: Map of parent entries for that project
+    // }
     for (const project of projects) {
-      allHierarchy.set(project.id, {
-        project,
-        parents: new Map(),
-      });
+      // const projectEntry = { project: project, parents: new Map() };
+      allHierarchy.set(project.id, { project: project, parents: new Map() });
     }
 
-    // 3) Add each parent into the correct project bucket
-    // Parents with 0 children still show up because they get seeded with atomics: []
-    for (const parent of parents) {
-      const matchingProjectEntry = allHierarchy.get(parent.projectId);
+    // parentLookup: Helper map for finding a parent entry directly by parent id
+    // Allows atomic children to find a parent even if that atomic child
+    // does not know the projectId to access the project bucket for its parent
+    // Key: parent.id
+    // Value = object containing: {
+    //   parent: full parent snapshot object,
+    //   atomics: array that will hold parent's atomic children
+    // }
+    const parentLookup = new Map();
 
-      if (!matchingProjectEntry) {
+    // Second pass: Add each parent to the correct project bucket. Every parent gets an array to hold atomics
+    // parents: Map where each parent id points to a parent entry under the current project.
+    // Key = parent.id
+    // Value = object containing: {
+    //   parent: full parent snapshot object,
+    //   atomics: array that will hold parent's atomic children
+    // }
+    for (const parent of parents) {
+      // Get the project bucket that matches the parent's projectId
+      const matchingProjectBucket = allHierarchy.get(parent.projectId);
+
+      if (!matchingProjectBucket) {
         continue;
       }
 
-      const parentEntry = {
-        parent,
-        atomics: [],
-      };
+      // Set the parent and array container for its atomics into this bucket
+      const parentEntry = { parent: parent, atomics: [] };
+      matchingProjectBucket.parents.set(parent.id, parentEntry);
 
-      matchingProjectEntry.parents.set(parent.id, parentEntry);
+      // The parentEntry object in the parentLookup map is the exact same parentEntry object in allHierarchyMap
+      // This works because this is a pass by reference. Both maps reference the same object in memory
       parentLookup.set(parent.id, parentEntry);
     }
 
-    // 4) Add each atomic into the correct parent bucket
+    // Third pass: Add each atomic to the array of the correct parent bucket.
     for (const atomic of atomics) {
-      const matchingParentEntry = parentLookup.get(atomic.parentId);
+      const matchingParentBucket = parentLookup.get(atomic.parentId);
 
-      if (!matchingParentEntry) {
+      if (!matchingParentBucket) {
         continue;
       }
 
-      matchingParentEntry.atomics.push(atomic);
+      matchingParentBucket.atomics.push(atomic);
     }
 
-    // Don't Delete - Study
-    // Array destructruring - skip the key and grab the value
-    // Outer loop value is the object holding full project data and parents inner map
-    // for (const [, projectEntry] of allHierarchy) {
-    //   console.log("PROJECT:", projectEntry.project.name);
+    // Fourth pass: Add each atomic to the array of the correct parent bucket.
 
-    //   // Inner loop value is the object holding full parent data and atomics inner array
-    //   for (const [, parentEntry] of projectEntry.parents) {
-    //     console.log("  PARENT:", parentEntry.parent.title);
-    //     console.log("  ATOMICS:", parentEntry.atomics);
-    //   }
-    // }
+    return { allHierarchy };
+  };
 
-    // Explicit Version - Don't Delete - Study
-    // for (const entry of allHierarchy) {
-    //   const projectId = entry[0];
-    //   const projectEntry = entry[1];
+  const displayAllHierarchy = () => {
+    // allHierarchy: Map where each project id points to that project's hierarchy bucket.
+    const allHierarchyCopy = buildAllHierarchy().allHierarchy;
+    // First get the value object of the first layer
+    for (const [outerKey, outerValue] of allHierarchyCopy) {
+      console.log(`PROJECT: ${outerValue.project.name}`);
 
-    //   console.log("PROJECT:", projectEntry.project.name);
-
-    //   for (const parentMapEntry of projectEntry.parents) {
-    //     const parentId = parentMapEntry[0];
-    //     const parentEntry = parentMapEntry[1];
-
-    //     console.log("  PARENT:", parentEntry.parent.title);
-    //     console.log("  ATOMICS:", parentEntry.atomics);
-    //   }
-    // }
-
-    // Even more explicit version - Don't Delete - Study
-    // for (const [projectId, projectEntry] of allHierarchy) {
-    //   console.log("PROJECT ID:", projectId);
-    //   console.log("PROJECT:", projectEntry.project.name);
-
-    //   for (const [parentId, parentEntry] of projectEntry.parents) {
-    //     console.log("  PARENT ID:", parentId);
-    //     console.log("  PARENT:", parentEntry.parent.title);
-    //     console.log("  ATOMICS:", parentEntry.atomics);
-    //   }
-    // }
-    return allHierarchy;
+      // Get the value object of the inner layer
+      for (const [innerKey, innerValue] of outerValue.parents) {
+        console.log(`Title: ${innerValue.parent.title}`);
+        console.log(`Description: ${innerValue.parent.description}`);
+        // console.log("ATOMICS", innerValue.atomics);
+        for (const atomic of innerValue.atomics) {
+          console.log(`Task: ${atomic.task}`);
+        }
+      }
+    }
   };
 
   const initializeAppData = () => {
@@ -281,6 +267,7 @@ const createCombinedService = () => {
 
   return {
     buildAllHierarchy,
+    displayAllHierarchy,
     initializeAppData,
     loadAppData,
     removeParent,
