@@ -1,4 +1,3 @@
-import { project } from "../model/project";
 import { toDoRepository } from "../repository/to-do-repository";
 import { atomicService } from "../service/atomic-service";
 import { parentService } from "../service/parent-service";
@@ -7,8 +6,8 @@ import { projectService } from "../service/project-service";
 const createCombinedService = () => {
   const buildAllHierarchy = () => {
     // Get every available data point
-    const projects = projectService.createProjectListSnapshot();
-    const parents = parentService.createParentListSnapshot();
+    const projects = projectService.getProjects();
+    const parents = parentService.getParents();
     const atomics = atomicService.createAtomicListSnapshot();
 
     // allHierarchy: Map where each project id points to that project's hierarchy bucket.
@@ -22,8 +21,7 @@ const createCombinedService = () => {
     //   parents: Map of parent entries for that project
     // }
     for (const project of projects) {
-      // const projectEntry = { project: project, parents: new Map() };
-      allHierarchy.set(project.id, { project: project, parents: new Map() });
+      allHierarchy.set(project.id, { project, parents: new Map() });
     }
 
     // parentLookup: Helper map for finding a parent entry directly by parent id
@@ -45,54 +43,100 @@ const createCombinedService = () => {
     // }
     for (const parent of parents) {
       // Get the project bucket that matches the parent's projectId
-      const matchingProjectBucket = allHierarchy.get(parent.projectId);
+      const matchingProjectEntry = allHierarchy.get(parent.projectId);
 
-      if (!matchingProjectBucket) {
+      if (!matchingProjectEntry) {
         continue;
       }
 
       // Set the parent and array container for its atomics into this bucket
-      const parentEntry = { parent: parent, atomics: [] };
-      matchingProjectBucket.parents.set(parent.id, parentEntry);
+      const parentEntry = { parent, atomics: [] };
+      matchingProjectEntry.parents.set(parent.id, parentEntry);
 
-      // The parentEntry object in the parentLookup map is the exact same parentEntry object in allHierarchyMap
+      // The parentEntry object in the parentLookup map is the exact same parentEntry object in allHierarchy
       // This works because this is a pass by reference. Both maps reference the same object in memory
       parentLookup.set(parent.id, parentEntry);
     }
 
     // Third pass: Add each atomic to the array of the correct parent bucket.
     for (const atomic of atomics) {
-      const matchingParentBucket = parentLookup.get(atomic.parentId);
+      const matchingParentEntry = parentLookup.get(atomic.parentId);
 
-      if (!matchingParentBucket) {
+      if (!matchingParentEntry) {
         continue;
       }
 
-      matchingParentBucket.atomics.push(atomic);
+      matchingParentEntry.atomics.push(atomic);
     }
 
-    // Fourth pass: Add each atomic to the array of the correct parent bucket.
-
-    return { allHierarchy };
+    return { success: true, allHierarchy };
   };
 
   const displayAllHierarchy = () => {
-    // allHierarchy: Map where each project id points to that project's hierarchy bucket.
-    const allHierarchyCopy = buildAllHierarchy().allHierarchy;
+    const hierarchyResult = buildAllHierarchy();
+
+    if (!hierarchyResult.success) {
+      return { success: false, reason: hierarchyResult.reason };
+    }
+
+    const allHierarchy = hierarchyResult.allHierarchy;
+
     // First get the value object of the first layer
-    for (const [outerKey, outerValue] of allHierarchyCopy) {
-      console.log(`PROJECT: ${outerValue.project.name}`);
+    for (const [, projectEntry] of allHierarchy) {
+      console.log(`PROJECT: ${projectEntry.project.name}`);
 
       // Get the value object of the inner layer
-      for (const [innerKey, innerValue] of outerValue.parents) {
-        console.log(`Title: ${innerValue.parent.title}`);
-        console.log(`Description: ${innerValue.parent.description}`);
-        // console.log("ATOMICS", innerValue.atomics);
-        for (const atomic of innerValue.atomics) {
+      for (const [, parentEntry] of projectEntry.parents) {
+        console.log(`Title: ${parentEntry.parent.title}`);
+        console.log(`Description: ${parentEntry.parent.description}`);
+
+        for (const atomic of parentEntry.atomics) {
           console.log(`Task: ${atomic.task}`);
         }
       }
     }
+
+    return { success: true };
+  };
+
+  const getParentCounts = () => {
+    const hierarchyResult = buildAllHierarchy();
+
+    if (!hierarchyResult.success) {
+      return { success: false, reason: hierarchyResult.reason };
+    }
+
+    const allHierarchy = hierarchyResult.allHierarchy;
+    const projectCounts = [];
+    let totalParentCount = 0;
+
+    // 1) Build sidebar-friendly project count snapshot
+    for (const [projectId, projectEntry] of allHierarchy) {
+      const projectName = projectEntry.project.name;
+      const parentCount = projectEntry.parents.size;
+
+      if (projectName !== "All") {
+        totalParentCount += parentCount;
+      }
+
+      projectCounts.push({
+        projectId,
+        projectName,
+        parentCount,
+      });
+    }
+
+    // 2) Overwrite "All" with the calculated total
+    for (const projectCountEntry of projectCounts) {
+      if (projectCountEntry.projectName === "All") {
+        projectCountEntry.parentCount = totalParentCount;
+      }
+    }
+
+    return {
+      success: true,
+      projectCounts: projectCounts,
+    };
   };
 
   const initializeAppData = () => {
@@ -202,19 +246,19 @@ const createCombinedService = () => {
       return { success: false, reason: reassignResult.reason };
     }
 
-    const removalResult = projectService.removeProject(name);
+    const projectRemovalResult = projectService.removeProject(name);
 
-    if (!removalResult.success) {
-      return { success: false, reason: removalResult.reason };
+    if (!projectRemovalResult.success) {
+      return { success: false, reason: projectRemovalResult.reason };
     }
 
     toDoRepository.save("parents", parentService.createParentListSnapshot());
-    toDoRepository.save("projects", projectService.createProjectListSnapshot());
+    toDoRepository.save("projects", projectService.getProjects());
 
     return {
       success: true,
       changed: reassignResult.changed,
-      removedProjectId: removalResult.removedProjectId,
+      removedProjectId: projectRemovalResult.removedProjectId,
       defaultProjectId,
     };
   };
@@ -242,10 +286,10 @@ const createCombinedService = () => {
     // Don't save until everything goes through successfully
     for (let i = targetParentIdsList.length - 1; i >= 0; i--) {
       const targetParentId = targetParentIdsList[i];
-      const removalResult = removeParentAndChildren(targetParentId);
+      const parentRemovalResult = removeParentAndChildren(targetParentId);
 
-      if (!removalResult.success) {
-        return { success: false, reason: removalResult.reason };
+      if (!parentRemovalResult.success) {
+        return { success: false, reason: parentRemovalResult.reason };
       }
     }
 
@@ -268,6 +312,7 @@ const createCombinedService = () => {
   return {
     buildAllHierarchy,
     displayAllHierarchy,
+    getParentCounts,
     initializeAppData,
     loadAppData,
     removeParent,
