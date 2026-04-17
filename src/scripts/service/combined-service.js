@@ -6,8 +6,8 @@ import { projectService } from "../service/project-service";
 const createCombinedService = () => {
   const buildAllHierarchy = () => {
     // Get every available data point
-    const projects = projectService.getProjects();
-    const parents = parentService.getParents();
+    const projects = projectService.createProjectListSnapshot();
+    const parents = parentService.createParentListSnapshot();
     const atomics = atomicService.createAtomicListSnapshot();
 
     // allHierarchy: Map where each project id points to that project's hierarchy bucket.
@@ -76,7 +76,7 @@ const createCombinedService = () => {
     const hierarchyResult = buildAllHierarchy();
 
     if (!hierarchyResult.success) {
-      return { success: false, reason: hierarchyResult.reason };
+      return { success: false, reason: "Error - Failed to fetch hierarchy data!" };
     }
 
     const allHierarchy = hierarchyResult.allHierarchy;
@@ -103,7 +103,7 @@ const createCombinedService = () => {
     const hierarchyResult = buildAllHierarchy();
 
     if (!hierarchyResult.success) {
-      return { success: false, reason: hierarchyResult.reason };
+      return { success: false, reason: "Error - Failed to fetch hierarchy data!" };
     }
 
     const allHierarchy = hierarchyResult.allHierarchy;

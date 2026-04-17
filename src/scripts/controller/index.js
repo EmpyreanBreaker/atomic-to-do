@@ -2,16 +2,23 @@ import "../../css/reset.css";
 import "../../css/styles.css";
 import "../../css/index.css";
 import { combinedService } from "../service/combined-service";
-import { asideFunctions, navigation } from "./aside";
-import { displayProjectInMain } from "./main";
+import { initializeAppControllers } from "./to-do-controller";
 
 (() => {
-  // =================================
-  // COMBINED READ & LOAD STORAGE
-  // =================================
   combinedService.initializeAppData();
   combinedService.loadAppData();
   combinedService.displayAllHierarchy();
-  asideFunctions();
-  navigation(displayProjectInMain);
+
+  const getBuildHierarchy = () => {
+    return combinedService.buildAllHierarchy();
+  };
+
+  const getParentCounts = () => {
+    return combinedService.getParentCounts();
+  };
+
+  initializeAppControllers({
+    getBuildHierarchy: getBuildHierarchy,
+    getParentCounts: getParentCounts,
+  });
 })();
