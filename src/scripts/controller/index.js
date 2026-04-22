@@ -7,7 +7,6 @@ import { initializeAppControllers } from "./to-do-controller";
 (() => {
   combinedService.initializeAppData();
   combinedService.loadAppData();
-  combinedService.displayAllHierarchy();
 
   const getBuildHierarchy = () => {
     return combinedService.buildAllHierarchy();

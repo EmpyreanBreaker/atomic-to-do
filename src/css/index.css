@@ -33,3 +33,19 @@
 li {
   list-style: none;
 }
+
+
+.main__field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.main__field-input-container {
+  display: flex;
+  gap: 1rem
+}
+
+.main__field-input-container {
+  width: 100%;
+}

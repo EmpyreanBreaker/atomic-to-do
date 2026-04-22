@@ -82,15 +82,15 @@ const createCombinedService = () => {
     const allHierarchy = hierarchyResult.allHierarchy;
 
     // First get the value object of the first layer
-    for (const [, projectEntry] of allHierarchy) {
-      console.log(`PROJECT: ${projectEntry.project.name}`);
+    for (const [, outerValue] of allHierarchy) {
+      console.log(`PROJECT: ${outerValue.project.name}`);
 
       // Get the value object of the inner layer
-      for (const [, parentEntry] of projectEntry.parents) {
-        console.log(`Title: ${parentEntry.parent.title}`);
-        console.log(`Description: ${parentEntry.parent.description}`);
+      for (const [, innerValue] of outerValue.parents) {
+        console.log(`Title: ${innerValue.parent.title}`);
+        console.log(`Description: ${innerValue.parent.description}`);
 
-        for (const atomic of parentEntry.atomics) {
+        for (const atomic of innerValue.atomics) {
           console.log(`Task: ${atomic.task}`);
         }
       }
