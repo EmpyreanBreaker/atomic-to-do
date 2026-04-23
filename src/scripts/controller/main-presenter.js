@@ -1,15 +1,16 @@
 const projectContainerElement = document.querySelector(".main__project-container");
 
-const renderToDosByProjectName = (allHierarchy, projectName) => {
+const renderToDosByProjectName = (projectName, allHierarchy) => {
   projectContainerElement.textContent = "";
+  console.log(projectName);
 
   if (projectName === "All") {
     renderAllProjects(allHierarchy);
     return { success: true };
   }
 
-  mainElement.textContent = "";
-  mainElement.textContent = `Selected Project: ${projectName}`;
+  projectContainerElement.textContent = `Selected Project: ${projectName}`;
+  return { success: true };
 };
 
 const renderAllProjects = (allHierarchy) => {

@@ -36,6 +36,7 @@ const bindProjectSelection = (onProjectSelected) => {
       return;
     }
 
+    console.log(projectButton.dataset.name);
     onProjectSelected(projectButton.dataset.name);
   });
 };

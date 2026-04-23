@@ -1,0 +1,63 @@
+.sidebar {
+  border-top: 3px solid #d8dee9;
+  border-bottom: 3px solid #d8dee9;
+  border-left: 3px dashed #d8dee9;
+  border-right: 3px dashed #d8dee9;
+  padding: 1rem;
+  grid-area: sidebar;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.sidebar__nav button {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sidebar__button-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sidebar__button {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.sidebar__button-container > p {
+  font-size: 2rem;
+}
+
+.sidebar__button-logo {
+  width: 1rem;
+  height: 1rem;
+}
+
+.sidebar__project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar__project-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

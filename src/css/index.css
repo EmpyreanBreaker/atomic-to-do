@@ -2,22 +2,16 @@
   width: 100vw;
   height: 100vh;
   display: grid;
+  background-color: #05070a;
+  color: white;
+  font-family: "IBM Plex Mono", monospace;
   grid-template-rows: 1fr 8fr 1fr;
   grid-template-columns: 2fr 8fr;
   grid-template-areas:
     "header header"
     "sidebar main"
     "footer footer";
-}
-
-.header {
-  border: 1px solid red;
-  grid-area: header;
-}
-
-.aside {
-  border: 1px solid blue;
-  grid-area: sidebar;
+  gap: 1rem;
 }
 
 .main {
@@ -30,22 +24,8 @@
   grid-area: footer;
 }
 
-li {
+ul {
   list-style: none;
-}
-
-
-.main__field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.main__field-input-container {
-  display: flex;
-  gap: 1rem
-}
-
-.main__field-input-container {
-  width: 100%;
+  padding: 0;
+  margin: 0;
 }

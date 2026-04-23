@@ -1,5 +1,7 @@
 import "../../css/reset.css";
-import "../../css/styles.css";
+import "../../css/fonts.css";
+import "../../css/header.css";
+import "../../css/sidebar.css";
 import "../../css/index.css";
 import { combinedService } from "../service/combined-service";
 import { initializeAppControllers } from "./to-do-controller";
@@ -8,16 +10,17 @@ import { initializeAppControllers } from "./to-do-controller";
   combinedService.initializeAppData();
   combinedService.loadAppData();
 
-  const getBuildHierarchy = () => {
-    return combinedService.buildAllHierarchy();
-  };
+  initializeAppControllers();
+  // const getBuildHierarchy = () => {
+  //   return combinedService.buildAllHierarchy();
+  // };
 
-  const getParentCounts = () => {
-    return combinedService.getParentCounts();
-  };
+  // const getParentCounts = () => {
+  //   return combinedService.getParentCounts();
+  // };
 
-  initializeAppControllers({
-    getBuildHierarchy: getBuildHierarchy,
-    getParentCounts: getParentCounts,
-  });
+  // initializeAppControllers({
+  //   getBuildHierarchy: getBuildHierarchy,
+  //   getParentCounts: getParentCounts,
+  // });
 })();
