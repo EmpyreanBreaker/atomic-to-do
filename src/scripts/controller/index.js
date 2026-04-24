@@ -15,4 +15,5 @@ import { toDoController } from "./to-do-controller";
   // INIT UI
   // =================================
   toDoController.initDisplay();
+
 })();

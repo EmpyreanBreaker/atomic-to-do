@@ -66,7 +66,34 @@ const initializeMainController = () => {
       return { success: true };
     }
 
-    renderByProjectName(projectName);
+    const hierarchyResult = combinedService.buildAllHierarchy();
+
+    if (!hierarchyResult.success) {
+      return {
+        success: false,
+        reason: "Error - Failed to fetch hierarchy data!",
+      };
+    }
+
+    const allHierarchy = hierarchyResult.allHierarchy;
+    let selectedProject = null;
+
+    for (const [, outerValue] of allHierarchy) {
+      if (outerValue.project.name === projectName) {
+        selectedProject = outerValue;
+        break;
+      }
+    }
+
+    if (!selectedProject) {
+      return {
+        success: false,
+        reason: `Project ${projectName} was not found!`,
+      };
+    }
+
+    console.log(selectedProject)
+    renderByProjectName(selectedProject);
 
     return { success: true };
   };
