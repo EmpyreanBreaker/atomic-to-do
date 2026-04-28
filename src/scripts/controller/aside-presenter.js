@@ -7,6 +7,18 @@ const bindProjectCreation = (onCreateProjectRequested) => {
   });
 };
 
+const bindProjectDeletion = (onProjectDeleteRequested) => {
+  projectListElement.addEventListener("click", (e) => {
+    const deleteButton = e.target.closest(".sidebar__project-delete-button");
+
+    if (!deleteButton) {
+      return;
+    }
+
+    onProjectDeleteRequested(deleteButton.dataset.name);
+  });
+};
+
 const bindProjectEdit = (onProjectEditRequested) => {
   projectListElement.addEventListener("click", (e) => {
     const editButton = e.target.closest(".sidebar__project-edit-button");
@@ -86,4 +98,10 @@ const renderSidebarProjectList = (sidebarProjects) => {
   return { success: true };
 };
 
-export { bindProjectCreation, bindProjectEdit, bindProjectSelection, renderSidebarProjectList };
+export {
+  bindProjectCreation,
+  bindProjectDeletion,
+  bindProjectEdit,
+  bindProjectSelection,
+  renderSidebarProjectList,
+};

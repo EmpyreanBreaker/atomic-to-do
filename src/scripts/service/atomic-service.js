@@ -85,25 +85,9 @@ const createAtomicService = () => {
     const retrievedAtomics = toDoRepository.load("atomics");
     const hydrationFailureList = [];
     let failed = 0;
-    let seeded = false;
+    const seeded = false;
 
     atomicManager.reset();
-
-    // Testing only: if storage exists but is empty, seed default atomic data once.
-    // After seeding, later reloads should hydrate from storage instead of creating again.
-    if (retrievedAtomics.length === 0) {
-      atomicServiceSeed();
-      seeded = true;
-
-      return {
-        success: true,
-        loaded: true,
-        seeded,
-        count: 0,
-        failed: 0,
-        hydrationFailureList,
-      };
-    }
 
     retrievedAtomics.forEach((atomic) => {
       const hydrationResult = atomicManager.addHydratedAtomic(atomic);
@@ -149,83 +133,6 @@ const createAtomicService = () => {
     toDoRepository.save("atomics", createAtomicListSnapshot());
 
     return { success: true, removed: removalResult.removed };
-  };
-
-  const atomicServiceSeed = () => {
-    // Clean kitchen
-    createAtomic("bf3b0047-8586-47ed-9f6d-41ea935e733a", "Wipe counters", "2026-04-06", "incomplete");
-
-    createAtomic("bf3b0047-8586-47ed-9f6d-41ea935e733a", "Take out trash", "2026-04-06", "incomplete");
-
-    // Laundry
-    createAtomic("aa645296-2bcf-4d99-87a2-7d85292058c2", "Wash clothes", "2026-04-07", "incomplete");
-
-    createAtomic("aa645296-2bcf-4d99-87a2-7d85292058c2", "Fold clothes", "2026-04-07", "incomplete");
-
-    // Update resume
-    createAtomic(
-      "fd666ee3-5057-42d3-acb4-bf9d93709743",
-      "Rewrite experience section",
-      "2026-04-10",
-      "incomplete",
-    );
-
-    createAtomic(
-      "fd666ee3-5057-42d3-acb4-bf9d93709743",
-      "Add recent project work",
-      "2026-04-10",
-      "incomplete",
-    );
-
-    // Study Maximo workflows
-    createAtomic("f2b3df87-d7f1-4fb2-8269-c00a733c2a78", "Review launch points", "2026-04-12", "incomplete");
-
-    createAtomic(
-      "f2b3df87-d7f1-4fb2-8269-c00a733c2a78",
-      "Review actions and conditions",
-      "2026-04-12",
-      "incomplete",
-    );
-
-    // Plan date night
-    createAtomic("9589594a-4d25-4bf9-a9f5-5b0658ca47f7", "Choose restaurant", "2026-04-08", "incomplete");
-
-    createAtomic("9589594a-4d25-4bf9-a9f5-5b0658ca47f7", "Confirm time", "2026-04-08", "incomplete");
-
-    // Call family
-    createAtomic("a8f3eac8-2b3c-4ab1-a7c7-c971c43909c8", "Call parents", "2026-04-05", "complete");
-
-    createAtomic(
-      "a8f3eac8-2b3c-4ab1-a7c7-c971c43909c8",
-      "Reply to family messages",
-      "2026-04-05",
-      "complete",
-    );
-
-    // Read SQL notes
-    createAtomic(
-      "3be53a7a-60d3-4129-8c90-bbc3f5ae39f0",
-      "Review EXISTS examples",
-      "2026-04-09",
-      "incomplete",
-    );
-
-    createAtomic("3be53a7a-60d3-4129-8c90-bbc3f5ae39f0", "Practice join queries", "2026-04-09", "incomplete");
-
-    // Practice JavaScript closures
-    createAtomic(
-      "cbb55524-e5c8-498d-b51f-59799209e194",
-      "Write one closure exercise",
-      "2026-04-11",
-      "incomplete",
-    );
-
-    createAtomic(
-      "cbb55524-e5c8-498d-b51f-59799209e194",
-      "Write one factory function exercise",
-      "2026-04-11",
-      "incomplete",
-    );
   };
 
   return {

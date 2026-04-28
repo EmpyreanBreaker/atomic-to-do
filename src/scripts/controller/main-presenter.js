@@ -4,82 +4,70 @@ const clearProjectContainer = () => {
   projectContainerElement.textContent = "";
 };
 
-const createFieldGroup = ({
-  labelText,
-  inputId,
-  inputTag = "input",
-  inputType = "text",
-  inputValue = "",
-  isChecked = false,
-  inputClasses = [],
+const formatDisplayDate = (dateString) => {
+  if (!dateString) {
+    return "No due date";
+  }
+
+  const [year, month, day] = dateString.split("-");
+
+  if (!year || !month || !day) {
+    return dateString;
+  }
+
+  return `${month}/${day}/${year}`;
+};
+
+const createActionButton = ({
+  text,
+  className,
   dataset = {},
 }) => {
-  const fieldGroup = document.createElement("div");
-  fieldGroup.classList.add("main__field-group");
-
-  const fieldControl = document.createElement("div");
-  fieldControl.classList.add("main__field-control");
-
-  const fieldLabel = document.createElement("label");
-  fieldLabel.classList.add("main__field-label");
-  fieldLabel.textContent = labelText;
-  fieldLabel.setAttribute("for", inputId);
-
-  const fieldInput = document.createElement(inputTag);
-  fieldInput.classList.add(...inputClasses, "main__editable-field");
-  fieldInput.id = inputId;
-
-  if (inputTag === "input") {
-    fieldInput.type = inputType;
-  }
-
-  if (inputType === "checkbox") {
-    fieldInput.checked = isChecked;
-  } else {
-    fieldInput.value = inputValue;
-  }
+  const button = document.createElement("button");
+  button.classList.add("main__action-button", className);
+  button.textContent = text;
 
   Object.entries(dataset).forEach(([key, value]) => {
-    fieldInput.dataset[key] = value;
+    button.dataset[key] = value;
   });
 
-  fieldControl.append(fieldLabel, fieldInput);
-  fieldGroup.append(fieldControl);
-
-  return fieldGroup;
+  return button;
 };
 
-const createParentCardButtons = () => {
-  const buttonContainer = document.createElement("div");
-  buttonContainer.classList.add("main__button-container");
+const createStatusCheckbox = ({
+  id,
+  checked,
+  dataset = {},
+  className,
+}) => {
+  const checkbox = document.createElement("input");
+  checkbox.classList.add(className);
+  checkbox.type = "checkbox";
+  checkbox.id = id;
+  checkbox.checked = checked;
 
-  const addAtomicButton = document.createElement("button");
-  addAtomicButton.classList.add("main__button", "main__button--add-atomic");
-  addAtomicButton.textContent = "Add Atomic Task";
+  Object.entries(dataset).forEach(([key, value]) => {
+    checkbox.dataset[key] = value;
+  });
 
-  const deleteParentButton = document.createElement("button");
-  deleteParentButton.classList.add("main__button", "main__button--delete-parent");
-  deleteParentButton.textContent = "Delete Parent";
-
-  buttonContainer.append(addAtomicButton, deleteParentButton);
-
-  return buttonContainer;
+  return checkbox;
 };
 
-const createAtomicCard = (atomic) => {
+const createAtomicRow = (atomic) => {
   const atomicCard = document.createElement("div");
   atomicCard.classList.add("main__atomic-card");
   atomicCard.dataset.atomicId = atomic.id;
 
-  const atomicHeader = document.createElement("div");
-  atomicHeader.classList.add("main__atomic-header");
+  const atomicInfoRow = document.createElement("div");
+  atomicInfoRow.classList.add("main__atomic-info-row");
 
-  const atomicStatusGroup = createFieldGroup({
-    labelText: "Status:",
-    inputId: `atomic-status-${atomic.id}`,
-    inputType: "checkbox",
-    isChecked: atomic.status === "complete",
-    inputClasses: ["main__atomic-status"],
+  const atomicStatus = document.createElement("div");
+  atomicStatus.classList.add("main__atomic-status-cell");
+
+  const atomicCheckbox = createStatusCheckbox({
+    id: `atomic-status-${atomic.id}`,
+    checked: atomic.status === "complete",
+    className: "main__atomic-status",
     dataset: {
       entityType: "atomic",
       entityId: atomic.id,
@@ -87,34 +75,39 @@ const createAtomicCard = (atomic) => {
     },
   });
 
-  const atomicTaskGroup = createFieldGroup({
-    labelText: "Task:",
-    inputId: `atomic-task-${atomic.id}`,
-    inputType: "text",
-    inputValue: atomic.task,
-    inputClasses: ["main__atomic-task"],
+  const atomicTask = document.createElement("p");
+  atomicTask.classList.add("main__atomic-task");
+  atomicTask.textContent = atomic.task || "Untitled atomic task";
+
+  const atomicDueDate = document.createElement("p");
+  atomicDueDate.classList.add("main__atomic-due-date");
+  atomicDueDate.textContent = formatDisplayDate(atomic.dueDate);
+
+  const atomicActions = document.createElement("div");
+  atomicActions.classList.add("main__atomic-actions");
+
+  const editAtomicButton = createActionButton({
+    text: "Edit Atomic",
+    className: "main__action-button--edit-atomic",
     dataset: {
-      entityType: "atomic",
-      entityId: atomic.id,
-      field: "task",
+      atomicId: atomic.id,
+      atomicTask: atomic.task,
     },
   });
 
-  const atomicDueDateGroup = createFieldGroup({
-    labelText: "Due Date:",
-    inputId: `atomic-due-date-${atomic.id}`,
-    inputType: "date",
-    inputValue: atomic.dueDate,
-    inputClasses: ["main__atomic-due-date"],
+  const deleteAtomicButton = createActionButton({
+    text: "Delete Atomic",
+    className: "main__action-button--delete-atomic",
     dataset: {
-      entityType: "atomic",
-      entityId: atomic.id,
-      field: "dueDate",
+      atomicId: atomic.id,
+      atomicTask: atomic.task,
     },
   });
 
-  atomicHeader.append(atomicStatusGroup, atomicTaskGroup, atomicDueDateGroup);
-  atomicCard.append(atomicHeader);
+  atomicStatus.append(atomicCheckbox);
+  atomicActions.append(editAtomicButton, deleteAtomicButton);
+  atomicInfoRow.append(atomicStatus, atomicTask, atomicDueDate, atomicActions);
+  atomicCard.append(atomicInfoRow);
 
   return atomicCard;
 };
@@ -126,31 +119,16 @@ const createParentCard = (parentEntry) => {
   parentCard.classList.add("main__parent-card");
   parentCard.dataset.parentId = parent.id;
 
-  const parentHeader = document.createElement("div");
-  parentHeader.classList.add("main__parent-header");
+  const parentInfoRow = document.createElement("div");
+  parentInfoRow.classList.add("main__parent-info-row");
 
-  const parentBody = document.createElement("div");
-  parentBody.classList.add("main__parent-body");
+  const parentStatus = document.createElement("div");
+  parentStatus.classList.add("main__parent-status-cell");
 
-  const parentTitleGroup = createFieldGroup({
-    labelText: "Title:",
-    inputId: `parent-title-${parent.id}`,
-    inputType: "text",
-    inputValue: parent.title,
-    inputClasses: ["main__parent-title"],
-    dataset: {
-      entityType: "parent",
-      entityId: parent.id,
-      field: "title",
-    },
-  });
-
-  const parentStatusGroup = createFieldGroup({
-    labelText: "Status:",
-    inputId: `parent-status-${parent.id}`,
-    inputType: "checkbox",
-    isChecked: parent.status === "complete",
-    inputClasses: ["main__parent-status"],
+  const parentCheckbox = createStatusCheckbox({
+    id: `parent-status-${parent.id}`,
+    checked: parent.status === "complete",
+    className: "main__parent-status",
     dataset: {
       entityType: "parent",
       entityId: parent.id,
@@ -158,41 +136,65 @@ const createParentCard = (parentEntry) => {
     },
   });
 
-  const parentDescriptionGroup = createFieldGroup({
-    labelText: "Description:",
-    inputId: `parent-description-${parent.id}`,
-    inputTag: "textarea",
-    inputValue: parent.description,
-    inputClasses: ["main__parent-description"],
+  const parentTitle = document.createElement("p");
+  parentTitle.classList.add("main__parent-title");
+  parentTitle.textContent = parent.title || "Untitled parent";
+
+  const parentDueDate = document.createElement("p");
+  parentDueDate.classList.add("main__parent-due-date");
+  parentDueDate.textContent = formatDisplayDate(parent.dueDate);
+
+  const parentActions = document.createElement("div");
+  parentActions.classList.add("main__parent-actions");
+
+  const editParentButton = createActionButton({
+    text: "Edit Parent",
+    className: "main__action-button--edit-parent",
     dataset: {
-      entityType: "parent",
-      entityId: parent.id,
-      field: "description",
+      parentId: parent.id,
+      parentTitle: parent.title,
     },
   });
 
-  const parentDueDateGroup = createFieldGroup({
-    labelText: "Due Date:",
-    inputId: `parent-due-date-${parent.id}`,
-    inputType: "date",
-    inputValue: parent.dueDate,
-    inputClasses: ["main__parent-due-date"],
+  const deleteParentButton = createActionButton({
+    text: "Delete Parent",
+    className: "main__action-button--delete-parent",
     dataset: {
-      entityType: "parent",
-      entityId: parent.id,
-      field: "dueDate",
+      parentId: parent.id,
+      parentTitle: parent.title,
     },
   });
 
-  parentHeader.append(parentTitleGroup, parentStatusGroup);
-  parentBody.append(parentDescriptionGroup, parentDueDateGroup);
-  parentCard.append(parentHeader, parentBody);
+  parentStatus.append(parentCheckbox);
+  parentActions.append(editParentButton, deleteParentButton);
+  parentInfoRow.append(parentStatus, parentTitle, parentDueDate, parentActions);
+
+  const parentDescription = document.createElement("p");
+  parentDescription.classList.add("main__parent-description");
+  parentDescription.textContent = parent.description || "No description";
+
+  const atomicList = document.createElement("div");
+  atomicList.classList.add("main__atomic-list");
 
   for (const atomic of parentEntry.atomics) {
-    parentCard.append(createAtomicCard(atomic));
+    atomicList.append(createAtomicRow(atomic));
   }
 
-  parentCard.append(createParentCardButtons());
+  const parentFooter = document.createElement("div");
+  parentFooter.classList.add("main__parent-footer");
+
+  const addAtomicButton = createActionButton({
+    text: "+ Add Atomic",
+    className: "main__action-button--add-atomic",
+    dataset: {
+      parentId: parent.id,
+      parentTitle: parent.title,
+    },
+  });
+
+  parentFooter.append(addAtomicButton);
+
+  parentCard.append(parentInfoRow, parentDescription, atomicList, parentFooter);
 
   return parentCard;
 };
@@ -200,26 +202,97 @@ const createParentCard = (parentEntry) => {
 const createProjectCard = (projectEntry) => {
   const projectCard = document.createElement("div");
   projectCard.classList.add("main__project-card");
+  projectCard.dataset.projectId = projectEntry.project.id;
 
   const projectHeader = document.createElement("div");
   projectHeader.classList.add("main__project-header");
 
-  const projectName = document.createElement("p");
+  const projectName = document.createElement("h2");
   projectName.classList.add("main__project-name");
   projectName.textContent = `PROJECT: ${projectEntry.project.name}`;
 
+  projectHeader.append(projectName);
+
   const projectParents = document.createElement("div");
   projectParents.classList.add("main__project-parents");
-
-  projectHeader.append(projectName);
 
   for (const [, parentEntry] of projectEntry.parents) {
     projectParents.append(createParentCard(parentEntry));
   }
 
-  projectCard.append(projectHeader, projectParents);
+  const projectFooter = document.createElement("div");
+  projectFooter.classList.add("main__project-footer");
+
+  const addParentButton = createActionButton({
+    text: "+ Add Parent",
+    className: "main__action-button--add-parent",
+    dataset: {
+      projectId: projectEntry.project.id,
+      projectName: projectEntry.project.name,
+    },
+  });
+
+  projectFooter.append(addParentButton);
+  projectCard.append(projectHeader, projectParents, projectFooter);
 
   return projectCard;
+};
+
+const renderDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConfirmed) => {
+  const deleteProjectDialog = document.createElement("dialog");
+  deleteProjectDialog.classList.add("dialog", "dialog--delete-project");
+
+  const deleteProjectForm = document.createElement("form");
+  deleteProjectForm.classList.add("dialog__form");
+
+  const deleteProjectTitle = document.createElement("h2");
+  deleteProjectTitle.classList.add("dialog__title");
+  deleteProjectTitle.textContent = "Delete Project";
+
+  const deleteProjectMessage = document.createElement("p");
+  deleteProjectMessage.classList.add("dialog__message");
+  deleteProjectMessage.textContent = `Are you sure you want to delete "${currentProjectName}" and all related to-dos?`;
+
+  const deleteProjectButtonGroup = document.createElement("div");
+  deleteProjectButtonGroup.classList.add("dialog__button-group");
+
+  const confirmButton = document.createElement("button");
+  confirmButton.classList.add("dialog__button");
+  confirmButton.type = "submit";
+  confirmButton.textContent = "Yes";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.classList.add("dialog__button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "No";
+
+  deleteProjectForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const deletionResult = onDeleteProjectConfirmed(currentProjectName);
+
+    if (!deletionResult.success) {
+      alert(deletionResult.reason);
+      return;
+    }
+
+    deleteProjectDialog.close();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    deleteProjectDialog.close();
+  });
+
+  deleteProjectButtonGroup.append(confirmButton, cancelButton);
+  deleteProjectForm.append(deleteProjectTitle, deleteProjectMessage, deleteProjectButtonGroup);
+  deleteProjectDialog.appendChild(deleteProjectForm);
+  document.body.appendChild(deleteProjectDialog);
+
+  deleteProjectDialog.addEventListener("close", () => {
+    deleteProjectDialog.remove();
+  });
+
+  deleteProjectDialog.showModal();
 };
 
 const renderEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
@@ -400,4 +473,10 @@ const renderNewProjectForm = (onCreateButtonSelected) => {
   newProjectInput.focus();
 };
 
-export { renderAllProjects, renderByProjectName, renderEditProjectForm, renderNewProjectForm };
+export {
+  renderAllProjects,
+  renderByProjectName,
+  renderDeleteProjectConfirmation,
+  renderEditProjectForm,
+  renderNewProjectForm,
+};

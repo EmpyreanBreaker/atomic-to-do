@@ -2,6 +2,7 @@ import { combinedService } from "../service/combined-service";
 import {
   renderAllProjects,
   renderByProjectName,
+  renderDeleteProjectConfirmation,
   renderEditProjectForm,
   renderNewProjectForm,
 } from "./main-presenter";
@@ -59,6 +60,22 @@ const createMainController = () => {
     };
   };
 
+  const openDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConfirmed) => {
+    renderDeleteProjectConfirmation(currentProjectName, onDeleteProjectConfirmed);
+
+    return { success: true };
+  };
+
+  const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
+    renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
+    return { success: true };
+  };
+
+  const openNewProjectForm = (onCreateProjectSubmitted) => {
+    renderNewProjectForm(onCreateProjectSubmitted);
+    return { success: true };
+  };
+
   const renderAll = () => {
     const hierarchyResult = buildNonEmptyDisplayHierarchy();
 
@@ -99,22 +116,13 @@ const createMainController = () => {
     return renderByProjectName(selectedProject);
   };
 
-  const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
-    renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
-    return { success: true };
-  };
-
-  const openNewProjectForm = (onCreateProjectSubmitted) => {
-    renderNewProjectForm(onCreateProjectSubmitted);
-    return { success: true };
-  };
-
   return {
     initMain: renderAll,
-    renderAll,
-    renderProject,
+    openDeleteProjectConfirmation,
     openEditProjectForm,
     openNewProjectForm,
+    renderAll,
+    renderProject,
   };
 };
 

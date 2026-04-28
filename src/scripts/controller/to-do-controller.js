@@ -1,4 +1,9 @@
-import { bindProjectCreation, bindProjectSelection, bindProjectEdit } from "./aside-presenter";
+import {
+  bindProjectCreation,
+  bindProjectSelection,
+  bindProjectDeletion,
+  bindProjectEdit,
+} from "./aside-presenter";
 import { asideController } from "./aside-controller";
 import { mainController } from "./main-controller";
 import { combinedService } from "../service/combined-service";
@@ -56,6 +61,24 @@ const createToDoController = () => {
     return mainController.openNewProjectForm(handleCreateProjectSubmit);
   };
 
+  const handleProjectDeleteConfirm = (projectName) => {
+    const deletionResult = combinedService.removeProjectAndChildren(projectName);
+
+    if (!deletionResult.success) {
+      return deletionResult;
+    }
+
+    if (selectedProjectName === projectName) {
+      selectedProjectName = "All";
+    }
+
+    return refreshDisplay();
+  };
+
+  const handleProjectDeleteRequest = (projectName) => {
+    return mainController.openDeleteProjectConfirmation(projectName, handleProjectDeleteConfirm);
+  };
+
   const handleProjectRenameSubmit = (currentProjectName, newProjectName) => {
     const renameResult = projectService.changeProjectName(currentProjectName, newProjectName);
 
@@ -77,6 +100,7 @@ const createToDoController = () => {
   const bindEvents = () => {
     bindProjectSelection(handleProjectSelection);
     bindProjectCreation(handleCreateProjectRequest);
+    bindProjectDeletion(handleProjectDeleteRequest);
     bindProjectEdit(handleProjectEditRequest);
 
     return { success: true };
