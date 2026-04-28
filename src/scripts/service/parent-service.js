@@ -35,14 +35,15 @@ const createParentService = () => {
     return { success: true, projectId: changeResult.projectId };
   };
 
-  const changeParentStatus = (id) => {
-    const changeResult = parentManager.changeParentStatus(id);
+  const changeParentStatus = (id, newStatus) => {
+    const changeResult = parentManager.changeParentStatus(id, newStatus);
 
     if (!changeResult.success) {
       return { success: false, reason: changeResult.reason };
     }
 
     toDoRepository.save("parents", createParentListSnapshot());
+
     return { success: true, status: changeResult.status };
   };
 

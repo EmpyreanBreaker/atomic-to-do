@@ -200,8 +200,9 @@ const createParentManager = () => {
     return { success: true, projectId: targetParent.getProjectId() };
   };
 
-  const changeParentStatus = (id) => {
+  const changeParentStatus = (id, newStatus) => {
     const cleanId = typeof id === "string" ? id.trim() : "";
+    const cleanStatus = typeof newStatus === "string" ? newStatus.trim().toLowerCase() : "";
 
     if (cleanId === "") {
       return {
@@ -210,7 +211,15 @@ const createParentManager = () => {
       };
     }
 
+    if (cleanStatus !== "complete" && cleanStatus !== "incomplete") {
+      return {
+        success: false,
+        reason: `Invalid Status - Status must be complete or incomplete!`,
+      };
+    }
+
     const targetParent = findParentById(cleanId);
+
     if (!targetParent) {
       return {
         success: false,
@@ -218,11 +227,12 @@ const createParentManager = () => {
       };
     }
 
-    targetParent.getStatus() === "incomplete"
-      ? targetParent.setStatus("complete")
-      : targetParent.setStatus("incomplete");
+    targetParent.setStatus(cleanStatus);
 
-    return { success: true, status: targetParent.getStatus() };
+    return {
+      success: true,
+      status: targetParent.getStatus(),
+    };
   };
 
   const changeParentTitle = (id, newTitle) => {

@@ -2,9 +2,10 @@ import { combinedService } from "../service/combined-service";
 import {
   renderAllProjects,
   renderByProjectName,
-  renderDeleteProjectConfirmation,
-  renderEditProjectForm,
   renderNewProjectForm,
+  renderEditProjectForm,
+  renderDeleteProjectConfirmation,
+  renderEditParentForm,
 } from "./main-presenter";
 
 const createMainController = () => {
@@ -66,6 +67,11 @@ const createMainController = () => {
     return { success: true };
   };
 
+  const openEditParentForm = (parentData, onEditParentSubmitted) => {
+    renderEditParentForm(parentData, onEditParentSubmitted);
+    return { success: true };
+  };
+
   const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
     renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
     return { success: true };
@@ -119,6 +125,7 @@ const createMainController = () => {
   return {
     initMain: renderAll,
     openDeleteProjectConfirmation,
+    openEditParentForm,
     openEditProjectForm,
     openNewProjectForm,
     renderAll,

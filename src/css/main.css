@@ -177,3 +177,14 @@
     padding-left: 0;
   }
 }
+
+.dialog__field-input[type="date"],
+.dialog__field-input,
+.dialog__form textarea {
+  font: inherit;
+}
+
+.dialog__form textarea {
+  min-height: 6rem;
+  resize: vertical;
+}

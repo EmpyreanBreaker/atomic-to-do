@@ -4,10 +4,12 @@ import {
   bindProjectDeletion,
   bindProjectEdit,
 } from "./aside-presenter";
+import { bindParentEdit } from "./main-presenter";
 import { asideController } from "./aside-controller";
 import { mainController } from "./main-controller";
 import { combinedService } from "../service/combined-service";
 import { projectService } from "../service/project-service";
+import { parentService } from "../service/parent-service";
 
 const createToDoController = () => {
   let selectedProjectName = "All";
@@ -30,11 +32,6 @@ const createToDoController = () => {
     }
 
     return { success: true };
-  };
-
-  const handleProjectSelection = (projectName) => {
-    selectedProjectName = projectName;
-    return refreshDisplay();
   };
 
   const handleCreateProjectSubmit = (projectName) => {
@@ -61,6 +58,44 @@ const createToDoController = () => {
     return mainController.openNewProjectForm(handleCreateProjectSubmit);
   };
 
+  const handleParentEditSubmit = (editedParentData) => {
+    const titleResult = parentService.changeParentTitle(editedParentData.parentId, editedParentData.title);
+
+    if (!titleResult.success) {
+      return titleResult;
+    }
+
+    const statusResult = parentService.changeParentStatus(editedParentData.parentId, editedParentData.status);
+    
+    if (!statusResult.success) {
+      return statusResult;
+    }
+
+    const descriptionResult = parentService.changeParentDescription(
+      editedParentData.parentId,
+      editedParentData.description,
+    );
+
+    if (!descriptionResult.success) {
+      return descriptionResult;
+    }
+
+    const dueDateResult = parentService.changeParentDueDate(
+      editedParentData.parentId,
+      editedParentData.dueDate,
+    );
+
+    if (!dueDateResult.success) {
+      return dueDateResult;
+    }
+
+    return refreshDisplay();
+  };
+
+  const handleParentEditRequest = (parentData) => {
+    return mainController.openEditParentForm(parentData, handleParentEditSubmit);
+  };
+
   const handleProjectDeleteConfirm = (projectName) => {
     const deletionResult = combinedService.removeProjectAndChildren(projectName);
 
@@ -79,6 +114,10 @@ const createToDoController = () => {
     return mainController.openDeleteProjectConfirmation(projectName, handleProjectDeleteConfirm);
   };
 
+  const handleProjectEditRequest = (projectName) => {
+    return mainController.openEditProjectForm(projectName, handleProjectRenameSubmit);
+  };
+
   const handleProjectRenameSubmit = (currentProjectName, newProjectName) => {
     const renameResult = projectService.changeProjectName(currentProjectName, newProjectName);
 
@@ -93,8 +132,9 @@ const createToDoController = () => {
     return refreshDisplay();
   };
 
-  const handleProjectEditRequest = (projectName) => {
-    return mainController.openEditProjectForm(projectName, handleProjectRenameSubmit);
+  const handleProjectSelection = (projectName) => {
+    selectedProjectName = projectName;
+    return refreshDisplay();
   };
 
   const bindEvents = () => {
@@ -102,6 +142,7 @@ const createToDoController = () => {
     bindProjectCreation(handleCreateProjectRequest);
     bindProjectDeletion(handleProjectDeleteRequest);
     bindProjectEdit(handleProjectEditRequest);
+    bindParentEdit(handleParentEditRequest);
 
     return { success: true };
   };
