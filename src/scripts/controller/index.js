@@ -6,14 +6,5 @@ import "../../css/index.css";
 import { toDoController } from "./to-do-controller";
 
 (() => {
-  // =================================
-  // INIT STORAGE
-  // =================================
-  toDoController.initStorage();
-
-  // =================================
-  // INIT UI
-  // =================================
-  toDoController.initDisplay();
-
+  toDoController.init();
 })();

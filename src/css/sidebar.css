@@ -1,14 +1,18 @@
 .sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 1rem;
+  font-weight: 600;
   border-top: 3px solid #d8dee9;
   border-bottom: 3px solid #d8dee9;
   border-left: 3px dashed #d8dee9;
   border-right: 3px dashed #d8dee9;
-  padding: 1rem;
-  grid-area: sidebar;
-  font-weight: 600;
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
+}
+
+.sidebar__title {
+  margin: 0;
 }
 
 .sidebar__nav {
@@ -17,7 +21,71 @@
   gap: 3rem;
 }
 
-.sidebar__nav button {
+.sidebar__create-project-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.sidebar__create-project-button {
+  appearance: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.sidebar__create-project-bracket {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.sidebar__create-project-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.sidebar__create-project-text {
+  display: inline-block;
+}
+
+.sidebar__project-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar__project-item {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar__project-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.sidebar__project-main-row,
+.sidebar__project-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar__project-button,
+.sidebar__project-edit-button,
+.sidebar__project-delete-button {
   appearance: none;
   border: none;
   background: none;
@@ -28,36 +96,15 @@
   cursor: pointer;
 }
 
-.sidebar__button-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+.sidebar__project-meta-row {
+  font-size: 0.9rem;
 }
 
-.sidebar__button {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
+.sidebar__project-edit-button,
+.sidebar__project-delete-button {
+  opacity: 0.7;
 }
 
-.sidebar__button-container > p {
-  font-size: 2rem;
-}
-
-.sidebar__button-logo {
-  width: 1rem;
-  height: 1rem;
-}
-
-.sidebar__project-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.sidebar__project-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.sidebar__project-count {
+  font: inherit;
 }

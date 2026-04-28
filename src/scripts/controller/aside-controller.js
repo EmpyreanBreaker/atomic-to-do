@@ -1,8 +1,7 @@
-import { renderSidebarProjectList } from "./aside-presenter";
 import { combinedService } from "../service/combined-service";
+import { renderSidebarProjectList } from "./aside-presenter";
 
-const initializeAsideController = () => {
-  // Edit the project data into a more manageable format
+const createAsideController = () => {
   const buildSidebarProjectData = () => {
     const hierarchyResult = combinedService.buildAllHierarchy();
     const parentCountsResult = combinedService.getParentCounts();
@@ -39,14 +38,19 @@ const initializeAsideController = () => {
         projectName: project.name,
         parentCount: parentCount,
       });
-
-      sidebarProjects.sort((a, b) => {
-        if (a.projectName === "All") return -1;
-        if (b.projectName === "All") return 1;
-
-        return a.projectName.localeCompare(b.projectName);
-      });
     }
+
+    sidebarProjects.sort((a, b) => {
+      if (a.projectName === "All") {
+        return -1;
+      }
+
+      if (b.projectName === "All") {
+        return 1;
+      }
+
+      return a.projectName.localeCompare(b.projectName);
+    });
 
     return {
       success: true,
@@ -54,25 +58,22 @@ const initializeAsideController = () => {
     };
   };
 
-  // USe the project data to create the sidebar
-  const initSidebar = () => {
+  const render = () => {
     const sidebarProjectsResult = buildSidebarProjectData();
 
     if (!sidebarProjectsResult.success) {
       return { success: false, reason: sidebarProjectsResult.reason };
     }
 
-    renderSidebarProjectList(sidebarProjectsResult.sidebarProjects);
-
-    return { success: true };
+    return renderSidebarProjectList(sidebarProjectsResult.sidebarProjects);
   };
 
-  const refreshSidebar = () => {
-    initSidebar();
+  return {
+    initSidebar: render,
+    refreshSidebar: render,
   };
-
-  return { initSidebar, refreshSidebar };
 };
 
-const asideController = initializeAsideController();
+const asideController = createAsideController();
+
 export { asideController };

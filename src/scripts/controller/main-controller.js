@@ -1,11 +1,14 @@
-import { renderAllProjects, renderByProjectName } from "./main-presenter";
 import { combinedService } from "../service/combined-service";
+import {
+  renderAllProjects,
+  renderByProjectName,
+  renderEditProjectForm,
+  renderNewProjectForm,
+} from "./main-presenter";
 
-const initializeMainController = () => {
-  const buildMainProjectData = () => {
-    // Edit the project data into a more manageable format
+const createMainController = () => {
+  const buildDisplayHierarchy = () => {
     const hierarchyResult = combinedService.buildAllHierarchy();
-    const parentCountsResult = combinedService.getParentCounts();
 
     if (!hierarchyResult.success) {
       return {
@@ -14,73 +17,74 @@ const initializeMainController = () => {
       };
     }
 
-    if (!parentCountsResult.success) {
-      return {
-        success: false,
-        reason: parentCountsResult.reason,
-      };
-    }
+    const displayHierarchy = new Map();
 
-    const allHierarchy = hierarchyResult.allHierarchy;
-    const projectCounts = parentCountsResult.projectCounts;
-    const keysToRemove = [];
+    for (const [projectId, projectEntry] of hierarchyResult.allHierarchy) {
+      const displayProjectName =
+        projectEntry.project.name === "All" ? "Unassigned" : projectEntry.project.name;
 
-    // Clean up the data
-    // Rename All to Unassigned
-    // Identify projects with 0 children
-    for (const [outerKey, outerValue] of allHierarchy) {
-      if (outerValue.project.name === "All") {
-        outerValue.project.name = "Unassigned";
-      }
-
-      if (outerValue.parents.size === 0) {
-        keysToRemove.push(outerKey);
-      }
-    }
-
-    // Delete projects with 0 children from the display map
-    // Storage and sidebar displays are unaffected
-    for (const key of keysToRemove) {
-      allHierarchy.delete(key);
+      displayHierarchy.set(projectId, {
+        project: {
+          ...projectEntry.project,
+          name: displayProjectName,
+        },
+        parents: projectEntry.parents,
+      });
     }
 
     return {
       success: true,
-      allHierarchy: allHierarchy,
+      allHierarchy: displayHierarchy,
     };
   };
 
-  const initMain = () => {
-    const allHierarchyResult = buildMainProjectData();
-
-    if (!allHierarchyResult.success) {
-      return { success: false, reason: allHierarchyResult.reason };
-    }
-
-    renderAllProjects(allHierarchyResult.allHierarchy);
-  };
-
-  const buildByProjectName = (projectName) => {
-    if (projectName === "All") {
-      initMain();
-      return { success: true };
-    }
-
-    const hierarchyResult = combinedService.buildAllHierarchy();
+  const buildNonEmptyDisplayHierarchy = () => {
+    const hierarchyResult = buildDisplayHierarchy();
 
     if (!hierarchyResult.success) {
-      return {
-        success: false,
-        reason: "Error - Failed to fetch hierarchy data!",
-      };
+      return hierarchyResult;
     }
 
-    const allHierarchy = hierarchyResult.allHierarchy;
+    const nonEmptyHierarchy = new Map();
+
+    for (const [projectId, projectEntry] of hierarchyResult.allHierarchy) {
+      if (projectEntry.parents.size > 0) {
+        nonEmptyHierarchy.set(projectId, projectEntry);
+      }
+    }
+
+    return {
+      success: true,
+      allHierarchy: nonEmptyHierarchy,
+    };
+  };
+
+  const renderAll = () => {
+    const hierarchyResult = buildNonEmptyDisplayHierarchy();
+
+    if (!hierarchyResult.success) {
+      return hierarchyResult;
+    }
+
+    return renderAllProjects(hierarchyResult.allHierarchy);
+  };
+
+  const renderProject = (projectName) => {
+    if (projectName === "All") {
+      return renderAll();
+    }
+
+    const hierarchyResult = buildDisplayHierarchy();
+
+    if (!hierarchyResult.success) {
+      return hierarchyResult;
+    }
+
     let selectedProject = null;
 
-    for (const [, outerValue] of allHierarchy) {
-      if (outerValue.project.name === projectName) {
-        selectedProject = outerValue;
+    for (const [, projectEntry] of hierarchyResult.allHierarchy) {
+      if (projectEntry.project.name === projectName) {
+        selectedProject = projectEntry;
         break;
       }
     }
@@ -92,14 +96,28 @@ const initializeMainController = () => {
       };
     }
 
-    console.log(selectedProject)
-    renderByProjectName(selectedProject);
+    return renderByProjectName(selectedProject);
+  };
 
+  const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
+    renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
     return { success: true };
   };
 
-  return { initMain, buildByProjectName };
+  const openNewProjectForm = (onCreateProjectSubmitted) => {
+    renderNewProjectForm(onCreateProjectSubmitted);
+    return { success: true };
+  };
+
+  return {
+    initMain: renderAll,
+    renderAll,
+    renderProject,
+    openEditProjectForm,
+    openNewProjectForm,
+  };
 };
 
-const mainController = initializeMainController();
+const mainController = createMainController();
+
 export { mainController };
