@@ -18,6 +18,36 @@ const formatDisplayDate = (dateString) => {
   return `${month}/${day}/${year}`;
 };
 
+const bindAddParent = (onAddParentRequested) => {
+  projectContainerElement.addEventListener("click", (e) => {
+    const addParentButton = e.target.closest(".main__action-button--add-parent");
+
+    if (!addParentButton) {
+      return;
+    }
+
+    onAddParentRequested({
+      projectId: addParentButton.dataset.projectId,
+      projectName: addParentButton.dataset.projectName,
+    });
+  });
+};
+
+const bindParentDelete = (onParentDeleteRequested) => {
+  projectContainerElement.addEventListener("click", (e) => {
+    const deleteParentButton = e.target.closest(".main__action-button--delete-parent");
+
+    if (!deleteParentButton) {
+      return;
+    }
+
+    onParentDeleteRequested({
+      parentId: deleteParentButton.dataset.parentId,
+      parentTitle: deleteParentButton.dataset.parentTitle,
+    });
+  });
+};
+
 const bindParentEdit = (onParentEditRequested) => {
   projectContainerElement.addEventListener("click", (e) => {
     const editParentButton = e.target.closest(".main__action-button--edit-parent");
@@ -248,6 +278,219 @@ const createProjectCard = (projectEntry) => {
   projectCard.append(projectHeader, projectParents, projectFooter);
 
   return projectCard;
+};
+
+const renderAddParentForm = (projectData, onAddParentSubmitted) => {
+  const existingDialog = document.querySelector(".dialog--add-parent");
+
+  if (existingDialog) {
+    existingDialog.showModal();
+    return;
+  }
+
+  const addParentDialog = document.createElement("dialog");
+  addParentDialog.classList.add("dialog", "dialog--add-parent");
+
+  const addParentForm = document.createElement("form");
+  addParentForm.classList.add("dialog__form");
+
+  const addParentTitle = document.createElement("h2");
+  addParentTitle.classList.add("dialog__title");
+  addParentTitle.textContent = `Add Parent to ${projectData.projectName}`;
+
+  const titleGroup = document.createElement("div");
+  titleGroup.classList.add("dialog__field-group");
+
+  const titleLabel = document.createElement("label");
+  titleLabel.classList.add("dialog__field-label");
+  titleLabel.textContent = "Title:";
+  titleLabel.setAttribute("for", "add-parent-title-input");
+
+  const titleInput = document.createElement("input");
+  titleInput.classList.add("dialog__field-input");
+  titleInput.type = "text";
+  titleInput.id = "add-parent-title-input";
+  titleInput.required = true;
+
+  titleGroup.append(titleLabel, titleInput);
+
+  const statusGroup = document.createElement("div");
+  statusGroup.classList.add("dialog__field-group");
+
+  const statusLabel = document.createElement("label");
+  statusLabel.classList.add("dialog__field-label");
+  statusLabel.textContent = "Complete:";
+  statusLabel.setAttribute("for", "add-parent-status-input");
+
+  const statusInput = document.createElement("input");
+  statusInput.type = "checkbox";
+  statusInput.id = "add-parent-status-input";
+  statusInput.checked = false;
+
+  statusGroup.append(statusLabel, statusInput);
+
+  const descriptionGroup = document.createElement("div");
+  descriptionGroup.classList.add("dialog__field-group");
+
+  const descriptionLabel = document.createElement("label");
+  descriptionLabel.classList.add("dialog__field-label");
+  descriptionLabel.textContent = "Description:";
+  descriptionLabel.setAttribute("for", "add-parent-description-input");
+
+  const descriptionInput = document.createElement("textarea");
+  descriptionInput.classList.add("dialog__field-input");
+  descriptionInput.id = "add-parent-description-input";
+
+  descriptionGroup.append(descriptionLabel, descriptionInput);
+
+  const dueDateGroup = document.createElement("div");
+  dueDateGroup.classList.add("dialog__field-group");
+
+  const dueDateLabel = document.createElement("label");
+  dueDateLabel.classList.add("dialog__field-label");
+  dueDateLabel.textContent = "Due Date:";
+  dueDateLabel.setAttribute("for", "add-parent-due-date-input");
+
+  const dueDateInput = document.createElement("input");
+  dueDateInput.classList.add("dialog__field-input");
+  dueDateInput.type = "date";
+  dueDateInput.id = "add-parent-due-date-input";
+  dueDateInput.required = true;
+
+  dueDateGroup.append(dueDateLabel, dueDateInput);
+
+  const buttonGroup = document.createElement("div");
+  buttonGroup.classList.add("dialog__button-group");
+
+  const createButton = document.createElement("button");
+  createButton.classList.add("dialog__button");
+  createButton.type = "submit";
+  createButton.textContent = "Add Parent";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.classList.add("dialog__button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "Cancel";
+
+  addParentForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const newParentData = {
+      projectId: projectData.projectId,
+      title: titleInput.value.trim(),
+      status: statusInput.checked ? "complete" : "incomplete",
+      description: descriptionInput.value.trim(),
+      dueDate: dueDateInput.value,
+    };
+
+    if (newParentData.title === "") {
+      alert("Parent title cannot be blank.");
+      return;
+    }
+
+    if (newParentData.dueDate === "") {
+      alert("Due date is required.");
+      return;
+    }
+
+    const creationResult = onAddParentSubmitted(newParentData);
+
+    if (!creationResult.success) {
+      alert(creationResult.reason);
+      return;
+    }
+
+    addParentDialog.close();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    addParentDialog.close();
+  });
+
+  buttonGroup.append(createButton, cancelButton);
+  addParentForm.append(addParentTitle, titleGroup, statusGroup, descriptionGroup, dueDateGroup, buttonGroup);
+
+  addParentDialog.append(addParentForm);
+  document.body.append(addParentDialog);
+
+  addParentDialog.addEventListener("close", () => {
+    addParentDialog.remove();
+  });
+
+  addParentDialog.showModal();
+  titleInput.focus();
+};
+
+const renderAllProjects = (allHierarchy) => {
+  const projectEntries = [];
+
+  for (const [, projectEntry] of allHierarchy) {
+    projectEntries.push(projectEntry);
+  }
+
+  return renderProjectEntries(projectEntries);
+};
+
+const renderByProjectName = (selectedProject) => {
+  return renderProjectEntries([selectedProject]);
+};
+
+const renderDeleteParentConfirmation = (parentData, onDeleteParentConfirmed) => {
+  const deleteParentDialog = document.createElement("dialog");
+  deleteParentDialog.classList.add("dialog", "dialog--delete-parent");
+
+  const deleteParentForm = document.createElement("form");
+  deleteParentForm.classList.add("dialog__form");
+
+  const deleteParentTitle = document.createElement("h2");
+  deleteParentTitle.classList.add("dialog__title");
+  deleteParentTitle.textContent = "Delete Parent";
+
+  const deleteParentMessage = document.createElement("p");
+  deleteParentMessage.classList.add("dialog__message");
+  deleteParentMessage.textContent = `Are you sure you want to delete "${parentData.parentTitle}" and all related atomic to-dos?`;
+
+  const deleteParentButtonGroup = document.createElement("div");
+  deleteParentButtonGroup.classList.add("dialog__button-group");
+
+  const confirmButton = document.createElement("button");
+  confirmButton.classList.add("dialog__button");
+  confirmButton.type = "submit";
+  confirmButton.textContent = "Yes";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.classList.add("dialog__button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "No";
+
+  deleteParentForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const deletionResult = onDeleteParentConfirmed(parentData.parentId);
+
+    if (!deletionResult.success) {
+      alert(deletionResult.reason);
+      return;
+    }
+
+    deleteParentDialog.close();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    deleteParentDialog.close();
+  });
+
+  deleteParentButtonGroup.append(confirmButton, cancelButton);
+  deleteParentForm.append(deleteParentTitle, deleteParentMessage, deleteParentButtonGroup);
+
+  deleteParentDialog.append(deleteParentForm);
+  document.body.append(deleteParentDialog);
+
+  deleteParentDialog.addEventListener("close", () => {
+    deleteParentDialog.remove();
+  });
+
+  deleteParentDialog.showModal();
 };
 
 const renderDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConfirmed) => {
@@ -544,20 +787,6 @@ const renderProjectEntries = (projectEntries) => {
   return { success: true };
 };
 
-const renderAllProjects = (allHierarchy) => {
-  const projectEntries = [];
-
-  for (const [, projectEntry] of allHierarchy) {
-    projectEntries.push(projectEntry);
-  }
-
-  return renderProjectEntries(projectEntries);
-};
-
-const renderByProjectName = (selectedProject) => {
-  return renderProjectEntries([selectedProject]);
-};
-
 const renderNewProjectForm = (onCreateButtonSelected) => {
   const existingDialog = document.querySelector(".dialog--new-project");
 
@@ -636,11 +865,15 @@ const renderNewProjectForm = (onCreateButtonSelected) => {
 };
 
 export {
+  bindAddParent,
+  bindParentDelete,
   bindParentEdit,
+  renderAddParentForm,
   renderAllProjects,
   renderByProjectName,
+  renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
-  renderEditProjectForm,
   renderEditParentForm,
+  renderEditProjectForm,
   renderNewProjectForm,
 };

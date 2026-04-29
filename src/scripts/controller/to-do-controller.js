@@ -1,10 +1,10 @@
 import {
-  bindProjectCreation,
+  bindAddProject,
   bindProjectSelection,
   bindProjectDeletion,
   bindProjectEdit,
 } from "./aside-presenter";
-import { bindParentEdit } from "./main-presenter";
+import { bindAddParent, bindParentEdit, bindParentDelete } from "./main-presenter";
 import { asideController } from "./aside-controller";
 import { mainController } from "./main-controller";
 import { combinedService } from "../service/combined-service";
@@ -34,7 +34,31 @@ const createToDoController = () => {
     return { success: true };
   };
 
-  const handleCreateProjectSubmit = (projectName) => {
+  const handleAddParentRequest = (projectData) => {
+    return mainController.openAddParentForm(projectData, handleAddParentSubmit);
+  };
+
+  const handleAddParentSubmit = (newParentData) => {
+    const creationResult = parentService.createParent(
+      newParentData.projectId,
+      newParentData.title,
+      newParentData.description,
+      newParentData.dueDate,
+      newParentData.status,
+    );
+
+    if (!creationResult.success) {
+      return creationResult;
+    }
+
+    return refreshDisplay();
+  };
+
+  const handleAddProjectRequest = () => {
+    return mainController.openAddProjectForm(handeAddProjectSubmit);
+  };
+
+  const handeAddProjectSubmit = (projectName) => {
     const creationResult = projectService.createProject(projectName);
 
     if (!creationResult.success) {
@@ -54,8 +78,18 @@ const createToDoController = () => {
     };
   };
 
-  const handleCreateProjectRequest = () => {
-    return mainController.openNewProjectForm(handleCreateProjectSubmit);
+  const handleParentDeleteConfirm = (parentId) => {
+    const deletionResult = combinedService.removeParent(parentId);
+
+    if (!deletionResult.success) {
+      return deletionResult;
+    }
+
+    return refreshDisplay();
+  };
+
+  const handleParentDeleteRequest = (parentData) => {
+    return mainController.openDeleteParentConfirmation(parentData, handleParentDeleteConfirm);
   };
 
   const handleParentEditSubmit = (editedParentData) => {
@@ -66,7 +100,7 @@ const createToDoController = () => {
     }
 
     const statusResult = parentService.changeParentStatus(editedParentData.parentId, editedParentData.status);
-    
+
     if (!statusResult.success) {
       return statusResult;
     }
@@ -138,8 +172,10 @@ const createToDoController = () => {
   };
 
   const bindEvents = () => {
+    bindAddParent(handleAddParentRequest);
+    bindAddProject(handleAddProjectRequest);
     bindProjectSelection(handleProjectSelection);
-    bindProjectCreation(handleCreateProjectRequest);
+    bindParentDelete(handleParentDeleteRequest);
     bindProjectDeletion(handleProjectDeleteRequest);
     bindProjectEdit(handleProjectEditRequest);
     bindParentEdit(handleParentEditRequest);

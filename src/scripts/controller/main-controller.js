@@ -1,11 +1,13 @@
 import { combinedService } from "../service/combined-service";
 import {
+  renderAddParentForm,
   renderAllProjects,
   renderByProjectName,
   renderNewProjectForm,
-  renderEditProjectForm,
+  renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
   renderEditParentForm,
+  renderEditProjectForm,
 } from "./main-presenter";
 
 const createMainController = () => {
@@ -67,6 +69,11 @@ const createMainController = () => {
     return { success: true };
   };
 
+  const openDeleteParentConfirmation = (parentData, onDeleteParentConfirmed) => {
+    renderDeleteParentConfirmation(parentData, onDeleteParentConfirmed);
+    return { success: true };
+  };
+
   const openEditParentForm = (parentData, onEditParentSubmitted) => {
     renderEditParentForm(parentData, onEditParentSubmitted);
     return { success: true };
@@ -77,7 +84,12 @@ const createMainController = () => {
     return { success: true };
   };
 
-  const openNewProjectForm = (onCreateProjectSubmitted) => {
+  const openAddParentForm = (projectData, onAddParentSubmitted) => {
+    renderAddParentForm(projectData, onAddParentSubmitted);
+    return { success: true };
+  };
+
+  const openAddProjectForm = (onCreateProjectSubmitted) => {
     renderNewProjectForm(onCreateProjectSubmitted);
     return { success: true };
   };
@@ -124,10 +136,12 @@ const createMainController = () => {
 
   return {
     initMain: renderAll,
+    openAddParentForm,
+    openAddProjectForm,
+    openDeleteParentConfirmation,
     openDeleteProjectConfirmation,
     openEditParentForm,
     openEditProjectForm,
-    openNewProjectForm,
     renderAll,
     renderProject,
   };

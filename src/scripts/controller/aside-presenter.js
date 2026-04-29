@@ -1,7 +1,7 @@
 const projectListElement = document.querySelector(".sidebar__project-list");
 const createProjectButtonElement = document.querySelector(".sidebar__create-project-button");
 
-const bindProjectCreation = (onCreateProjectRequested) => {
+const bindAddProject = (onCreateProjectRequested) => {
   createProjectButtonElement.addEventListener("click", () => {
     onCreateProjectRequested();
   });
@@ -99,7 +99,7 @@ const renderSidebarProjectList = (sidebarProjects) => {
 };
 
 export {
-  bindProjectCreation,
+  bindAddProject,
   bindProjectDeletion,
   bindProjectEdit,
   bindProjectSelection,
