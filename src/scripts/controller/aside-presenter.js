@@ -1,13 +1,13 @@
-const projectListElement = document.querySelector(".sidebar__project-list");
 const createProjectButtonElement = document.querySelector(".sidebar__create-project-button");
+const projectListElement = document.querySelector(".sidebar__project-list");
 
-const bindAddProject = (onCreateProjectRequested) => {
+const bindAddProject = (onAddProjectRequested) => {
   createProjectButtonElement.addEventListener("click", () => {
-    onCreateProjectRequested();
+    onAddProjectRequested();
   });
 };
 
-const bindProjectDeletion = (onProjectDeleteRequested) => {
+const bindDeleteProject = (onDeleteProjectRequested) => {
   projectListElement.addEventListener("click", (e) => {
     const deleteButton = e.target.closest(".sidebar__project-delete-button");
 
@@ -15,11 +15,11 @@ const bindProjectDeletion = (onProjectDeleteRequested) => {
       return;
     }
 
-    onProjectDeleteRequested(deleteButton.dataset.name);
+    onDeleteProjectRequested(deleteButton.dataset.name);
   });
 };
 
-const bindProjectEdit = (onProjectEditRequested) => {
+const bindEditProject = (onEditProjectRequested) => {
   projectListElement.addEventListener("click", (e) => {
     const editButton = e.target.closest(".sidebar__project-edit-button");
 
@@ -27,11 +27,11 @@ const bindProjectEdit = (onProjectEditRequested) => {
       return;
     }
 
-    onProjectEditRequested(editButton.dataset.name);
+    onEditProjectRequested(editButton.dataset.name);
   });
 };
 
-const bindProjectSelection = (onProjectSelected) => {
+const bindSelectProject = (onSelectProjectRequested) => {
   projectListElement.addEventListener("click", (e) => {
     const projectButton = e.target.closest(".sidebar__project-button");
 
@@ -39,7 +39,7 @@ const bindProjectSelection = (onProjectSelected) => {
       return;
     }
 
-    onProjectSelected(projectButton.dataset.name);
+    onSelectProjectRequested(projectButton.dataset.name);
   });
 };
 
@@ -100,8 +100,8 @@ const renderSidebarProjectList = (sidebarProjects) => {
 
 export {
   bindAddProject,
-  bindProjectDeletion,
-  bindProjectEdit,
-  bindProjectSelection,
+  bindDeleteProject,
+  bindEditProject,
+  bindSelectProject,
   renderSidebarProjectList,
 };

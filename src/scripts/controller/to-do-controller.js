@@ -1,56 +1,42 @@
+import { atomicService } from "../service/atomic-service";
+import { combinedService } from "../service/combined-service";
+import { parentService } from "../service/parent-service";
+import { projectService } from "../service/project-service";
+import { asideController } from "./aside-controller";
 import {
   bindAddProject,
-  bindProjectSelection,
-  bindProjectDeletion,
-  bindProjectEdit,
+  bindDeleteProject,
+  bindEditProject,
+  bindSelectProject,
 } from "./aside-presenter";
+import { mainController } from "./main-controller";
 import {
   bindAddAtomic,
   bindAddParent,
-  bindAtomicDelete,
-  bindParentDelete,
-  bindParentEdit,
+  bindDeleteAtomic,
+  bindDeleteParent,
+  bindEditParent,
 } from "./main-presenter";
-import { asideController } from "./aside-controller";
-import { mainController } from "./main-controller";
-import { combinedService } from "../service/combined-service";
-import { projectService } from "../service/project-service";
-import { parentService } from "../service/parent-service";
-import { atomicService } from "../service/atomic-service";
 
 const createToDoController = () => {
   let selectedProjectName = "All";
 
-  const refreshDisplay = () => {
-    const sidebarResult = asideController.refreshSidebar();
-
-    if (!sidebarResult.success) {
-      return sidebarResult;
-    }
-
-    const mainResult =
-      selectedProjectName === "All"
-        ? mainController.renderAll()
-        : mainController.renderProject(selectedProjectName);
-
-    if (!mainResult.success) {
-      selectedProjectName = "All";
-      return mainController.renderAll();
-    }
+  const bindEvents = () => {
+    bindAddAtomic(handleAddAtomicRequest);
+    bindAddParent(handleAddParentRequest);
+    bindAddProject(handleAddProjectRequest);
+    bindDeleteAtomic(handleDeleteAtomicRequest);
+    bindDeleteParent(handleDeleteParentRequest);
+    bindDeleteProject(handleDeleteProjectRequest);
+    bindEditParent(handleEditParentRequest);
+    bindEditProject(handleEditProjectRequest);
+    bindSelectProject(handleSelectProject);
 
     return { success: true };
   };
 
   const handleAddAtomicRequest = (parentData) => {
     return mainController.openAddAtomicForm(parentData, handleAddAtomicSubmit);
-  };
-
-  const handleAddParentRequest = (projectData) => {
-    return mainController.openAddParentForm(projectData, handleAddParentSubmit);
-  };
-
-  const handleAddProjectRequest = () => {
-    return mainController.openAddProjectForm(handeAddProjectSubmit);
   };
 
   const handleAddAtomicSubmit = (newAtomicData) => {
@@ -66,6 +52,10 @@ const createToDoController = () => {
     }
 
     return refreshDisplay();
+  };
+
+  const handleAddParentRequest = (projectData) => {
+    return mainController.openAddParentForm(projectData, handleAddParentSubmit);
   };
 
   const handleAddParentSubmit = (newParentData) => {
@@ -84,7 +74,11 @@ const createToDoController = () => {
     return refreshDisplay();
   };
 
-  const handeAddProjectSubmit = (projectName) => {
+  const handleAddProjectRequest = () => {
+    return mainController.openAddProjectForm(handleAddProjectSubmit);
+  };
+
+  const handleAddProjectSubmit = (projectName) => {
     const creationResult = projectService.createProject(projectName);
 
     if (!creationResult.success) {
@@ -114,6 +108,10 @@ const createToDoController = () => {
     return refreshDisplay();
   };
 
+  const handleDeleteAtomicRequest = (atomicData) => {
+    return mainController.openDeleteAtomicConfirmation(atomicData, handleDeleteAtomicConfirm);
+  };
+
   const handleDeleteParentConfirm = (parentId) => {
     const deletionResult = combinedService.removeParent(parentId);
 
@@ -128,19 +126,29 @@ const createToDoController = () => {
     return mainController.openDeleteParentConfirmation(parentData, handleDeleteParentConfirm);
   };
 
-  const handleParentEditSubmit = (editedParentData) => {
-    const titleResult = parentService.changeParentTitle(editedParentData.parentId, editedParentData.title);
+  const handleDeleteProjectConfirm = (projectName) => {
+    const deletionResult = combinedService.removeProjectAndChildren(projectName);
 
-    if (!titleResult.success) {
-      return titleResult;
+    if (!deletionResult.success) {
+      return deletionResult;
     }
 
-    const statusResult = parentService.changeParentStatus(editedParentData.parentId, editedParentData.status);
-
-    if (!statusResult.success) {
-      return statusResult;
+    if (selectedProjectName === projectName) {
+      selectedProjectName = "All";
     }
 
+    return refreshDisplay();
+  };
+
+  const handleDeleteProjectRequest = (projectName) => {
+    return mainController.openDeleteProjectConfirmation(projectName, handleDeleteProjectConfirm);
+  };
+
+  const handleEditParentRequest = (parentData) => {
+    return mainController.openEditParentForm(parentData, handleEditParentSubmit);
+  };
+
+  const handleEditParentSubmit = (editedParentData) => {
     const descriptionResult = parentService.changeParentDescription(
       editedParentData.parentId,
       editedParentData.description,
@@ -159,40 +167,32 @@ const createToDoController = () => {
       return dueDateResult;
     }
 
-    return refreshDisplay();
-  };
+    const statusResult = parentService.changeParentStatus(
+      editedParentData.parentId,
+      editedParentData.status,
+    );
 
-  const handleAtomicDeleteRequest = (atomicData) => {
-    return mainController.openDeleteAtomicConfirmation(atomicData, handleDeleteAtomicConfirm);
-  };
-
-  const handleParentEditRequest = (parentData) => {
-    return mainController.openEditParentForm(parentData, handleParentEditSubmit);
-  };
-
-  const handleProjectDeleteConfirm = (projectName) => {
-    const deletionResult = combinedService.removeProjectAndChildren(projectName);
-
-    if (!deletionResult.success) {
-      return deletionResult;
+    if (!statusResult.success) {
+      return statusResult;
     }
 
-    if (selectedProjectName === projectName) {
-      selectedProjectName = "All";
+    const titleResult = parentService.changeParentTitle(
+      editedParentData.parentId,
+      editedParentData.title,
+    );
+
+    if (!titleResult.success) {
+      return titleResult;
     }
 
     return refreshDisplay();
   };
 
-  const handleProjectDeleteRequest = (projectName) => {
-    return mainController.openDeleteProjectConfirmation(projectName, handleProjectDeleteConfirm);
+  const handleEditProjectRequest = (projectName) => {
+    return mainController.openEditProjectForm(projectName, handleEditProjectSubmit);
   };
 
-  const handleProjectEditRequest = (projectName) => {
-    return mainController.openEditProjectForm(projectName, handleProjectRenameSubmit);
-  };
-
-  const handleProjectRenameSubmit = (currentProjectName, newProjectName) => {
+  const handleEditProjectSubmit = (currentProjectName, newProjectName) => {
     const renameResult = projectService.changeProjectName(currentProjectName, newProjectName);
 
     if (!renameResult.success) {
@@ -206,23 +206,22 @@ const createToDoController = () => {
     return refreshDisplay();
   };
 
-  const handleProjectSelection = (projectName) => {
+  const handleSelectProject = (projectName) => {
     selectedProjectName = projectName;
     return refreshDisplay();
   };
 
-  const bindEvents = () => {
-    bindAtomicDelete(handleAtomicDeleteRequest);
-    bindAddAtomic(handleAddAtomicRequest);
-    bindAddParent(handleAddParentRequest);
-    bindAddProject(handleAddProjectRequest);
-    bindProjectSelection(handleProjectSelection);
-    bindParentDelete(handleDeleteParentRequest);
-    bindProjectDeletion(handleProjectDeleteRequest);
-    bindProjectEdit(handleProjectEditRequest);
-    bindParentEdit(handleParentEditRequest);
+  const init = () => {
+    initStorage();
+    loadStorage();
+    initDisplay();
+    bindEvents();
 
     return { success: true };
+  };
+
+  const initDisplay = () => {
+    return refreshDisplay();
   };
 
   const initStorage = () => {
@@ -233,15 +232,22 @@ const createToDoController = () => {
     return combinedService.loadAppData();
   };
 
-  const initDisplay = () => {
-    return refreshDisplay();
-  };
+  const refreshDisplay = () => {
+    const sidebarResult = asideController.refreshSidebar();
 
-  const init = () => {
-    initStorage();
-    loadStorage();
-    initDisplay();
-    bindEvents();
+    if (!sidebarResult.success) {
+      return sidebarResult;
+    }
+
+    const mainResult =
+      selectedProjectName === "All"
+        ? mainController.renderAll()
+        : mainController.renderProject(selectedProjectName);
+
+    if (!mainResult.success) {
+      selectedProjectName = "All";
+      return mainController.renderAll();
+    }
 
     return { success: true };
   };

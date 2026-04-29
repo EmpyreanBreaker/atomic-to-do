@@ -4,12 +4,12 @@ import {
   renderAddParentForm,
   renderAllProjects,
   renderByProjectName,
-  renderNewProjectForm,
   renderDeleteAtomicConfirmation,
   renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
   renderEditParentForm,
   renderEditProjectForm,
+  renderNewProjectForm,
 } from "./main-presenter";
 
 const createMainController = () => {
@@ -75,8 +75,8 @@ const createMainController = () => {
     return { success: true };
   };
 
-  const openAddProjectForm = (onCreateProjectSubmitted) => {
-    renderNewProjectForm(onCreateProjectSubmitted);
+  const openAddProjectForm = (onAddProjectSubmitted) => {
+    renderNewProjectForm(onAddProjectSubmitted);
     return { success: true };
   };
 
@@ -90,9 +90,8 @@ const createMainController = () => {
     return { success: true };
   };
 
-  const openDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConfirmed) => {
-    renderDeleteProjectConfirmation(currentProjectName, onDeleteProjectConfirmed);
-
+  const openDeleteProjectConfirmation = (projectName, onDeleteProjectConfirmed) => {
+    renderDeleteProjectConfirmation(projectName, onDeleteProjectConfirmed);
     return { success: true };
   };
 
@@ -101,8 +100,8 @@ const createMainController = () => {
     return { success: true };
   };
 
-  const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
-    renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
+  const openEditProjectForm = (projectName, onEditProjectSubmitted) => {
+    renderEditProjectForm(projectName, onEditProjectSubmitted);
     return { success: true };
   };
 

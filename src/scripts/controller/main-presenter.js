@@ -48,7 +48,7 @@ const bindAddParent = (onAddParentRequested) => {
   });
 };
 
-const bindAtomicDelete = (onAtomicDeleteRequested) => {
+const bindDeleteAtomic = (onAtomicDeleteRequested) => {
   projectContainerElement.addEventListener("click", (e) => {
     const deleteAtomicButton = e.target.closest(".main__action-button--delete-atomic");
 
@@ -63,7 +63,7 @@ const bindAtomicDelete = (onAtomicDeleteRequested) => {
   });
 };
 
-const bindParentDelete = (onParentDeleteRequested) => {
+const bindDeleteParent = (onParentDeleteRequested) => {
   projectContainerElement.addEventListener("click", (e) => {
     const deleteParentButton = e.target.closest(".main__action-button--delete-parent");
 
@@ -78,7 +78,7 @@ const bindParentDelete = (onParentDeleteRequested) => {
   });
 };
 
-const bindParentEdit = (onParentEditRequested) => {
+const bindEditParent = (onParentEditRequested) => {
   projectContainerElement.addEventListener("click", (e) => {
     const editParentButton = e.target.closest(".main__action-button--edit-parent");
 
@@ -1081,9 +1081,9 @@ const renderNewProjectForm = (onCreateButtonSelected) => {
 export {
   bindAddAtomic,
   bindAddParent,
-  bindAtomicDelete,
-  bindParentDelete,
-  bindParentEdit,
+  bindDeleteAtomic,
+  bindDeleteParent,
+  bindEditParent,
   renderAddAtomicForm,
   renderAddParentForm,
   renderAllProjects,
