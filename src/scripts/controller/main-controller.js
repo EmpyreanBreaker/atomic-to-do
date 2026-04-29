@@ -1,9 +1,11 @@
 import { combinedService } from "../service/combined-service";
 import {
+  renderAddAtomicForm,
   renderAddParentForm,
   renderAllProjects,
   renderByProjectName,
   renderNewProjectForm,
+  renderDeleteAtomicConfirmation,
   renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
   renderEditParentForm,
@@ -63,24 +65,8 @@ const createMainController = () => {
     };
   };
 
-  const openDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConfirmed) => {
-    renderDeleteProjectConfirmation(currentProjectName, onDeleteProjectConfirmed);
-
-    return { success: true };
-  };
-
-  const openDeleteParentConfirmation = (parentData, onDeleteParentConfirmed) => {
-    renderDeleteParentConfirmation(parentData, onDeleteParentConfirmed);
-    return { success: true };
-  };
-
-  const openEditParentForm = (parentData, onEditParentSubmitted) => {
-    renderEditParentForm(parentData, onEditParentSubmitted);
-    return { success: true };
-  };
-
-  const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
-    renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
+  const openAddAtomicForm = (parentData, onAddAtomicSubmitted) => {
+    renderAddAtomicForm(parentData, onAddAtomicSubmitted);
     return { success: true };
   };
 
@@ -91,6 +77,32 @@ const createMainController = () => {
 
   const openAddProjectForm = (onCreateProjectSubmitted) => {
     renderNewProjectForm(onCreateProjectSubmitted);
+    return { success: true };
+  };
+
+  const openDeleteAtomicConfirmation = (atomicData, onDeleteAtomicConfirmed) => {
+    renderDeleteAtomicConfirmation(atomicData, onDeleteAtomicConfirmed);
+    return { success: true };
+  };
+
+  const openDeleteParentConfirmation = (parentData, onDeleteParentConfirmed) => {
+    renderDeleteParentConfirmation(parentData, onDeleteParentConfirmed);
+    return { success: true };
+  };
+
+  const openDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConfirmed) => {
+    renderDeleteProjectConfirmation(currentProjectName, onDeleteProjectConfirmed);
+
+    return { success: true };
+  };
+
+  const openEditParentForm = (parentData, onEditParentSubmitted) => {
+    renderEditParentForm(parentData, onEditParentSubmitted);
+    return { success: true };
+  };
+
+  const openEditProjectForm = (currentProjectName, onRenameProjectSubmitted) => {
+    renderEditProjectForm(currentProjectName, onRenameProjectSubmitted);
     return { success: true };
   };
 
@@ -136,8 +148,10 @@ const createMainController = () => {
 
   return {
     initMain: renderAll,
+    openAddAtomicForm,
     openAddParentForm,
     openAddProjectForm,
+    openDeleteAtomicConfirmation,
     openDeleteParentConfirmation,
     openDeleteProjectConfirmation,
     openEditParentForm,

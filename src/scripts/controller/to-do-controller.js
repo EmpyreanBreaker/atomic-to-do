@@ -4,12 +4,19 @@ import {
   bindProjectDeletion,
   bindProjectEdit,
 } from "./aside-presenter";
-import { bindAddParent, bindParentEdit, bindParentDelete } from "./main-presenter";
+import {
+  bindAddAtomic,
+  bindAddParent,
+  bindAtomicDelete,
+  bindParentDelete,
+  bindParentEdit,
+} from "./main-presenter";
 import { asideController } from "./aside-controller";
 import { mainController } from "./main-controller";
 import { combinedService } from "../service/combined-service";
 import { projectService } from "../service/project-service";
 import { parentService } from "../service/parent-service";
+import { atomicService } from "../service/atomic-service";
 
 const createToDoController = () => {
   let selectedProjectName = "All";
@@ -34,8 +41,31 @@ const createToDoController = () => {
     return { success: true };
   };
 
+  const handleAddAtomicRequest = (parentData) => {
+    return mainController.openAddAtomicForm(parentData, handleAddAtomicSubmit);
+  };
+
   const handleAddParentRequest = (projectData) => {
     return mainController.openAddParentForm(projectData, handleAddParentSubmit);
+  };
+
+  const handleAddProjectRequest = () => {
+    return mainController.openAddProjectForm(handeAddProjectSubmit);
+  };
+
+  const handleAddAtomicSubmit = (newAtomicData) => {
+    const creationResult = atomicService.createAtomic(
+      newAtomicData.parentId,
+      newAtomicData.task,
+      newAtomicData.dueDate,
+      newAtomicData.status,
+    );
+
+    if (!creationResult.success) {
+      return creationResult;
+    }
+
+    return refreshDisplay();
   };
 
   const handleAddParentSubmit = (newParentData) => {
@@ -52,10 +82,6 @@ const createToDoController = () => {
     }
 
     return refreshDisplay();
-  };
-
-  const handleAddProjectRequest = () => {
-    return mainController.openAddProjectForm(handeAddProjectSubmit);
   };
 
   const handeAddProjectSubmit = (projectName) => {
@@ -78,7 +104,17 @@ const createToDoController = () => {
     };
   };
 
-  const handleParentDeleteConfirm = (parentId) => {
+  const handleDeleteAtomicConfirm = (atomicId) => {
+    const deletionResult = atomicService.removeAtomic(atomicId);
+
+    if (!deletionResult.success) {
+      return deletionResult;
+    }
+
+    return refreshDisplay();
+  };
+
+  const handleDeleteParentConfirm = (parentId) => {
     const deletionResult = combinedService.removeParent(parentId);
 
     if (!deletionResult.success) {
@@ -88,8 +124,8 @@ const createToDoController = () => {
     return refreshDisplay();
   };
 
-  const handleParentDeleteRequest = (parentData) => {
-    return mainController.openDeleteParentConfirmation(parentData, handleParentDeleteConfirm);
+  const handleDeleteParentRequest = (parentData) => {
+    return mainController.openDeleteParentConfirmation(parentData, handleDeleteParentConfirm);
   };
 
   const handleParentEditSubmit = (editedParentData) => {
@@ -124,6 +160,10 @@ const createToDoController = () => {
     }
 
     return refreshDisplay();
+  };
+
+  const handleAtomicDeleteRequest = (atomicData) => {
+    return mainController.openDeleteAtomicConfirmation(atomicData, handleDeleteAtomicConfirm);
   };
 
   const handleParentEditRequest = (parentData) => {
@@ -172,10 +212,12 @@ const createToDoController = () => {
   };
 
   const bindEvents = () => {
+    bindAtomicDelete(handleAtomicDeleteRequest);
+    bindAddAtomic(handleAddAtomicRequest);
     bindAddParent(handleAddParentRequest);
     bindAddProject(handleAddProjectRequest);
     bindProjectSelection(handleProjectSelection);
-    bindParentDelete(handleParentDeleteRequest);
+    bindParentDelete(handleDeleteParentRequest);
     bindProjectDeletion(handleProjectDeleteRequest);
     bindProjectEdit(handleProjectEditRequest);
     bindParentEdit(handleParentEditRequest);

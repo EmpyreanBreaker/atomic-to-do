@@ -18,6 +18,21 @@ const formatDisplayDate = (dateString) => {
   return `${month}/${day}/${year}`;
 };
 
+const bindAddAtomic = (onAddAtomicRequested) => {
+  projectContainerElement.addEventListener("click", (e) => {
+    const addAtomicButton = e.target.closest(".main__action-button--add-atomic");
+
+    if (!addAtomicButton) {
+      return;
+    }
+
+    onAddAtomicRequested({
+      parentId: addAtomicButton.dataset.parentId,
+      parentTitle: addAtomicButton.dataset.parentTitle,
+    });
+  });
+};
+
 const bindAddParent = (onAddParentRequested) => {
   projectContainerElement.addEventListener("click", (e) => {
     const addParentButton = e.target.closest(".main__action-button--add-parent");
@@ -29,6 +44,21 @@ const bindAddParent = (onAddParentRequested) => {
     onAddParentRequested({
       projectId: addParentButton.dataset.projectId,
       projectName: addParentButton.dataset.projectName,
+    });
+  });
+};
+
+const bindAtomicDelete = (onAtomicDeleteRequested) => {
+  projectContainerElement.addEventListener("click", (e) => {
+    const deleteAtomicButton = e.target.closest(".main__action-button--delete-atomic");
+
+    if (!deleteAtomicButton) {
+      return;
+    }
+
+    onAtomicDeleteRequested({
+      atomicId: deleteAtomicButton.dataset.atomicId,
+      atomicTask: deleteAtomicButton.dataset.atomicTask,
     });
   });
 };
@@ -280,6 +310,132 @@ const createProjectCard = (projectEntry) => {
   return projectCard;
 };
 
+const renderAddAtomicForm = (parentData, onAddAtomicSubmitted) => {
+  const existingDialog = document.querySelector(".dialog--add-atomic");
+
+  if (existingDialog) {
+    existingDialog.showModal();
+    return;
+  }
+
+  const addAtomicDialog = document.createElement("dialog");
+  addAtomicDialog.classList.add("dialog", "dialog--add-atomic");
+
+  const addAtomicForm = document.createElement("form");
+  addAtomicForm.classList.add("dialog__form");
+
+  const addAtomicTitle = document.createElement("h2");
+  addAtomicTitle.classList.add("dialog__title");
+  addAtomicTitle.textContent = `Add Atomic to ${parentData.parentTitle}`;
+
+  const taskGroup = document.createElement("div");
+  taskGroup.classList.add("dialog__field-group");
+
+  const taskLabel = document.createElement("label");
+  taskLabel.classList.add("dialog__field-label");
+  taskLabel.textContent = "Task:";
+  taskLabel.setAttribute("for", "add-atomic-task-input");
+
+  const taskInput = document.createElement("input");
+  taskInput.classList.add("dialog__field-input");
+  taskInput.type = "text";
+  taskInput.id = "add-atomic-task-input";
+  taskInput.required = true;
+
+  taskGroup.append(taskLabel, taskInput);
+
+  const statusGroup = document.createElement("div");
+  statusGroup.classList.add("dialog__field-group");
+
+  const statusLabel = document.createElement("label");
+  statusLabel.classList.add("dialog__field-label");
+  statusLabel.textContent = "Complete:";
+  statusLabel.setAttribute("for", "add-atomic-status-input");
+
+  const statusInput = document.createElement("input");
+  statusInput.type = "checkbox";
+  statusInput.id = "add-atomic-status-input";
+  statusInput.checked = false;
+
+  statusGroup.append(statusLabel, statusInput);
+
+  const dueDateGroup = document.createElement("div");
+  dueDateGroup.classList.add("dialog__field-group");
+
+  const dueDateLabel = document.createElement("label");
+  dueDateLabel.classList.add("dialog__field-label");
+  dueDateLabel.textContent = "Due Date:";
+  dueDateLabel.setAttribute("for", "add-atomic-due-date-input");
+
+  const dueDateInput = document.createElement("input");
+  dueDateInput.classList.add("dialog__field-input");
+  dueDateInput.type = "date";
+  dueDateInput.id = "add-atomic-due-date-input";
+  dueDateInput.required = true;
+
+  dueDateGroup.append(dueDateLabel, dueDateInput);
+
+  const buttonGroup = document.createElement("div");
+  buttonGroup.classList.add("dialog__button-group");
+
+  const createButton = document.createElement("button");
+  createButton.classList.add("dialog__button");
+  createButton.type = "submit";
+  createButton.textContent = "Add Atomic";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.classList.add("dialog__button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "Cancel";
+
+  addAtomicForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const newAtomicData = {
+      parentId: parentData.parentId,
+      task: taskInput.value.trim(),
+      status: statusInput.checked ? "complete" : "incomplete",
+      dueDate: dueDateInput.value,
+    };
+
+    if (newAtomicData.task === "") {
+      alert("Atomic task cannot be blank.");
+      return;
+    }
+
+    if (newAtomicData.dueDate === "") {
+      alert("Due date is required.");
+      return;
+    }
+
+    const creationResult = onAddAtomicSubmitted(newAtomicData);
+
+    if (!creationResult.success) {
+      alert(creationResult.reason);
+      return;
+    }
+
+    addAtomicDialog.close();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    addAtomicDialog.close();
+  });
+
+  buttonGroup.append(createButton, cancelButton);
+  addAtomicForm.append(addAtomicTitle, taskGroup, statusGroup, dueDateGroup, buttonGroup);
+
+  addAtomicDialog.append(addAtomicForm);
+  document.body.append(addAtomicDialog);
+
+  addAtomicDialog.addEventListener("close", () => {
+    addAtomicDialog.remove();
+  });
+
+  addAtomicDialog.showModal();
+  taskInput.focus();
+};
+
 const renderAddParentForm = (projectData, onAddParentSubmitted) => {
   const existingDialog = document.querySelector(".dialog--add-parent");
 
@@ -433,6 +589,64 @@ const renderAllProjects = (allHierarchy) => {
 
 const renderByProjectName = (selectedProject) => {
   return renderProjectEntries([selectedProject]);
+};
+
+const renderDeleteAtomicConfirmation = (atomicData, onDeleteAtomicConfirmed) => {
+  const deleteAtomicDialog = document.createElement("dialog");
+  deleteAtomicDialog.classList.add("dialog", "dialog--delete-atomic");
+
+  const deleteAtomicForm = document.createElement("form");
+  deleteAtomicForm.classList.add("dialog__form");
+
+  const deleteAtomicTitle = document.createElement("h2");
+  deleteAtomicTitle.classList.add("dialog__title");
+  deleteAtomicTitle.textContent = "Delete Atomic";
+
+  const deleteAtomicMessage = document.createElement("p");
+  deleteAtomicMessage.classList.add("dialog__message");
+  deleteAtomicMessage.textContent = `Are you sure you want to delete "${atomicData.atomicTask}"?`;
+
+  const deleteAtomicButtonGroup = document.createElement("div");
+  deleteAtomicButtonGroup.classList.add("dialog__button-group");
+
+  const confirmButton = document.createElement("button");
+  confirmButton.classList.add("dialog__button");
+  confirmButton.type = "submit";
+  confirmButton.textContent = "Yes";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.classList.add("dialog__button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "No";
+
+  deleteAtomicForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const deletionResult = onDeleteAtomicConfirmed(atomicData.atomicId);
+
+    if (!deletionResult.success) {
+      alert(deletionResult.reason);
+      return;
+    }
+
+    deleteAtomicDialog.close();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    deleteAtomicDialog.close();
+  });
+
+  deleteAtomicButtonGroup.append(confirmButton, cancelButton);
+  deleteAtomicForm.append(deleteAtomicTitle, deleteAtomicMessage, deleteAtomicButtonGroup);
+
+  deleteAtomicDialog.append(deleteAtomicForm);
+  document.body.append(deleteAtomicDialog);
+
+  deleteAtomicDialog.addEventListener("close", () => {
+    deleteAtomicDialog.remove();
+  });
+
+  deleteAtomicDialog.showModal();
 };
 
 const renderDeleteParentConfirmation = (parentData, onDeleteParentConfirmed) => {
@@ -865,12 +1079,16 @@ const renderNewProjectForm = (onCreateButtonSelected) => {
 };
 
 export {
+  bindAddAtomic,
   bindAddParent,
+  bindAtomicDelete,
   bindParentDelete,
   bindParentEdit,
+  renderAddAtomicForm,
   renderAddParentForm,
   renderAllProjects,
   renderByProjectName,
+  renderDeleteAtomicConfirmation,
   renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
   renderEditParentForm,
