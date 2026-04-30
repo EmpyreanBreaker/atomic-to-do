@@ -5,10 +5,11 @@ import {
   renderAllProjects,
   renderByProjectName,
   renderDeleteAtomicConfirmation,
-  renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
-  renderEditParentForm,
+  renderDeleteParentConfirmation,
+  renderEditAtomicForm,
   renderEditProjectForm,
+  renderEditParentForm,
   renderNewProjectForm,
 } from "./main-presenter";
 
@@ -95,6 +96,11 @@ const createMainController = () => {
     return { success: true };
   };
 
+  const openEditAtomicForm = (atomicData, handleEditAtomicSubmit) => {
+    renderEditAtomicForm(atomicData, handleEditAtomicSubmit);
+    return { success: true };
+  };
+
   const openEditParentForm = (parentData, onEditParentSubmitted) => {
     renderEditParentForm(parentData, onEditParentSubmitted);
     return { success: true };
@@ -153,6 +159,7 @@ const createMainController = () => {
     openDeleteAtomicConfirmation,
     openDeleteParentConfirmation,
     openDeleteProjectConfirmation,
+    openEditAtomicForm,
     openEditParentForm,
     openEditProjectForm,
     renderAll,

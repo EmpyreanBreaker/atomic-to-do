@@ -35,14 +35,15 @@ const createAtomicService = () => {
     return { success: true, parentId: changeResult.parentId };
   };
 
-  const changeAtomicStatus = (id) => {
-    const changeResult = atomicManager.changeAtomicStatus(id);
+  const changeAtomicStatus = (id, newStatus) => {
+    const changeResult = atomicManager.changeAtomicStatus(id, newStatus);
 
     if (!changeResult.success) {
       return { success: false, reason: changeResult.reason };
     }
 
     toDoRepository.save("atomics", createAtomicListSnapshot());
+
     return { success: true, status: changeResult.status };
   };
 

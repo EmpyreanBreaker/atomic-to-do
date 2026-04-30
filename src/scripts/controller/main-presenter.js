@@ -78,6 +78,23 @@ const bindDeleteParent = (onParentDeleteRequested) => {
   });
 };
 
+const bindEditAtomic = (handleEditAtomicRequest) => {
+  projectContainerElement.addEventListener("click", (e) => {
+    const editAtomicButton = e.target.closest(".main__action-button--edit-atomic");
+
+    if (!editAtomicButton) {
+      return;
+    }
+
+    handleEditAtomicRequest({
+      atomicId: editAtomicButton.dataset.atomicId,
+      atomicTask: editAtomicButton.dataset.atomicTask,
+      atomicDueDate: editAtomicButton.dataset.atomicDueDate,
+      atomicStatus: editAtomicButton.dataset.atomicStatus,
+    });
+  });
+};
+
 const bindEditParent = (onParentEditRequested) => {
   projectContainerElement.addEventListener("click", (e) => {
     const editParentButton = e.target.closest(".main__action-button--edit-parent");
@@ -92,6 +109,36 @@ const bindEditParent = (onParentEditRequested) => {
       parentDescription: editParentButton.dataset.parentDescription,
       parentDueDate: editParentButton.dataset.parentDueDate,
       parentStatus: editParentButton.dataset.parentStatus,
+    });
+  });
+};
+
+const bindToggleAtomicStatus = (handleToggleAtomicStatus) => {
+  projectContainerElement.addEventListener("change", (e) => {
+    const atomicCheckbox = e.target.closest(".main__atomic-status");
+
+    if (!atomicCheckbox) {
+      return;
+    }
+
+    handleToggleAtomicStatus({
+      atomicId: atomicCheckbox.dataset.entityId,
+      status: atomicCheckbox.checked ? "complete" : "incomplete",
+    });
+  });
+};
+
+const bindToggleParentStatus = (handleToggleParentStatus) => {
+  projectContainerElement.addEventListener("change", (e) => {
+    const parentCheckbox = e.target.closest(".main__parent-status");
+
+    if (!parentCheckbox) {
+      return;
+    }
+
+    handleToggleParentStatus({
+      parentId: parentCheckbox.dataset.entityId,
+      status: parentCheckbox.checked ? "complete" : "incomplete",
     });
   });
 };
@@ -160,7 +207,9 @@ const createAtomicRow = (atomic) => {
     className: "main__action-button--edit-atomic",
     dataset: {
       atomicId: atomic.id,
-      atomicTask: atomic.task,
+      atomicTask: atomic.task || "",
+      atomicDueDate: atomic.dueDate || "",
+      atomicStatus: atomic.status || "incomplete",
     },
   });
 
@@ -764,6 +813,133 @@ const renderDeleteProjectConfirmation = (currentProjectName, onDeleteProjectConf
   deleteProjectDialog.showModal();
 };
 
+const renderEditAtomicForm = (atomicData, handleEditAtomicSubmit) => {
+  const existingDialog = document.querySelector(".dialog--edit-atomic");
+
+  if (existingDialog) {
+    existingDialog.showModal();
+    return;
+  }
+
+  const editAtomicDialog = document.createElement("dialog");
+  editAtomicDialog.classList.add("dialog", "dialog--edit-atomic");
+
+  const editAtomicForm = document.createElement("form");
+  editAtomicForm.classList.add("dialog__form");
+
+  const editAtomicTitle = document.createElement("h2");
+  editAtomicTitle.classList.add("dialog__title");
+  editAtomicTitle.textContent = "Edit Atomic";
+
+  const taskGroup = document.createElement("div");
+  taskGroup.classList.add("dialog__field-group");
+
+  const taskLabel = document.createElement("label");
+  taskLabel.classList.add("dialog__field-label");
+  taskLabel.textContent = "Task:";
+  taskLabel.setAttribute("for", "edit-atomic-task-input");
+
+  const taskInput = document.createElement("input");
+  taskInput.classList.add("dialog__field-input");
+  taskInput.type = "text";
+  taskInput.id = "edit-atomic-task-input";
+  taskInput.value = atomicData.atomicTask;
+  taskInput.required = true;
+
+  taskGroup.append(taskLabel, taskInput);
+
+  const statusGroup = document.createElement("div");
+  statusGroup.classList.add("dialog__field-group");
+
+  const statusLabel = document.createElement("label");
+  statusLabel.classList.add("dialog__field-label");
+  statusLabel.textContent = "Complete:";
+  statusLabel.setAttribute("for", "edit-atomic-status-input");
+
+  const statusInput = document.createElement("input");
+  statusInput.type = "checkbox";
+  statusInput.id = "edit-atomic-status-input";
+  statusInput.checked = atomicData.atomicStatus === "complete";
+
+  statusGroup.append(statusLabel, statusInput);
+
+  const dueDateGroup = document.createElement("div");
+  dueDateGroup.classList.add("dialog__field-group");
+
+  const dueDateLabel = document.createElement("label");
+  dueDateLabel.classList.add("dialog__field-label");
+  dueDateLabel.textContent = "Due Date:";
+  dueDateLabel.setAttribute("for", "edit-atomic-due-date-input");
+
+  const dueDateInput = document.createElement("input");
+  dueDateInput.classList.add("dialog__field-input");
+  dueDateInput.type = "date";
+  dueDateInput.id = "edit-atomic-due-date-input";
+  dueDateInput.value = atomicData.atomicDueDate;
+  dueDateInput.required = true;
+
+  dueDateGroup.append(dueDateLabel, dueDateInput);
+
+  const buttonGroup = document.createElement("div");
+  buttonGroup.classList.add("dialog__button-group");
+
+  const saveButton = document.createElement("button");
+  saveButton.classList.add("dialog__button");
+  saveButton.type = "submit";
+  saveButton.textContent = "Save Atomic";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.classList.add("dialog__button");
+  cancelButton.type = "button";
+  cancelButton.textContent = "Cancel";
+
+  editAtomicForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const editedAtomicData = {
+      atomicId: atomicData.atomicId,
+      task: taskInput.value.trim(),
+      status: statusInput.checked ? "complete" : "incomplete",
+      dueDate: dueDateInput.value,
+    };
+
+    if (editedAtomicData.task === "") {
+      alert("Atomic task cannot be blank.");
+      return;
+    }
+
+    if (editedAtomicData.dueDate === "") {
+      alert("Due date is required.");
+      return;
+    }
+
+    const editResult = handleEditAtomicSubmit(editedAtomicData);
+
+    if (!editResult.success) {
+      alert(editResult.reason);
+      return;
+    }
+
+    editAtomicDialog.close();
+  });
+
+  cancelButton.addEventListener("click", () => {
+    editAtomicDialog.close();
+  });
+
+  buttonGroup.append(saveButton, cancelButton);
+  editAtomicForm.append(editAtomicTitle, taskGroup, statusGroup, dueDateGroup, buttonGroup);
+
+  editAtomicDialog.append(editAtomicForm);
+  document.body.append(editAtomicDialog);
+
+  editAtomicDialog.addEventListener("close", () => {
+    editAtomicDialog.remove();
+  });
+
+  editAtomicDialog.showModal();
+};
+
 const renderEditParentForm = (parentData, onEditParentSubmitted) => {
   const existingDialog = document.querySelector(".dialog--edit-parent");
 
@@ -1083,15 +1259,19 @@ export {
   bindAddParent,
   bindDeleteAtomic,
   bindDeleteParent,
+  bindEditAtomic,
   bindEditParent,
+  bindToggleAtomicStatus,
+  bindToggleParentStatus,
   renderAddAtomicForm,
   renderAddParentForm,
   renderAllProjects,
   renderByProjectName,
   renderDeleteAtomicConfirmation,
-  renderDeleteParentConfirmation,
   renderDeleteProjectConfirmation,
-  renderEditParentForm,
+  renderDeleteParentConfirmation,
+  renderEditAtomicForm,
   renderEditProjectForm,
+  renderEditParentForm,
   renderNewProjectForm,
 };

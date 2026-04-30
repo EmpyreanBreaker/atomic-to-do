@@ -1,5 +1,0 @@
-let initializeAsideController() receive the dependencies once
-define refreshSidebar and other helpers in that controller scope
-bind presenter events inside init
-have those bound callbacks call the helpers
-optionally return helpers like refreshSidebar if something outside the controller needs to trigger them later

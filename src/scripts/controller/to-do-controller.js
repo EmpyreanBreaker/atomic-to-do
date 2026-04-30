@@ -3,19 +3,17 @@ import { combinedService } from "../service/combined-service";
 import { parentService } from "../service/parent-service";
 import { projectService } from "../service/project-service";
 import { asideController } from "./aside-controller";
-import {
-  bindAddProject,
-  bindDeleteProject,
-  bindEditProject,
-  bindSelectProject,
-} from "./aside-presenter";
+import { bindAddProject, bindDeleteProject, bindEditProject, bindSelectProject } from "./aside-presenter";
 import { mainController } from "./main-controller";
 import {
   bindAddAtomic,
   bindAddParent,
   bindDeleteAtomic,
   bindDeleteParent,
+  bindEditAtomic,
   bindEditParent,
+  bindToggleAtomicStatus,
+  bindToggleParentStatus,
 } from "./main-presenter";
 
 const createToDoController = () => {
@@ -28,9 +26,12 @@ const createToDoController = () => {
     bindDeleteAtomic(handleDeleteAtomicRequest);
     bindDeleteParent(handleDeleteParentRequest);
     bindDeleteProject(handleDeleteProjectRequest);
+    bindEditAtomic(handleEditAtomicRequest);
     bindEditParent(handleEditParentRequest);
     bindEditProject(handleEditProjectRequest);
     bindSelectProject(handleSelectProject);
+    bindToggleAtomicStatus(handleToggleAtomicStatus);
+    bindToggleParentStatus(handleToggleParentStatus);
 
     return { success: true };
   };
@@ -144,8 +145,37 @@ const createToDoController = () => {
     return mainController.openDeleteProjectConfirmation(projectName, handleDeleteProjectConfirm);
   };
 
+  const handleEditAtomicRequest = (atomicData) => {
+    return mainController.openEditAtomicForm(atomicData, handleEditAtomicSubmit);
+  };
+
   const handleEditParentRequest = (parentData) => {
     return mainController.openEditParentForm(parentData, handleEditParentSubmit);
+  };
+
+  const handleEditAtomicSubmit = (editedAtomicData) => {
+    const taskResult = atomicService.changeAtomicTask(editedAtomicData.atomicId, editedAtomicData.task);
+
+    if (!taskResult.success) {
+      return taskResult;
+    }
+
+    const statusResult = atomicService.changeAtomicStatus(editedAtomicData.atomicId, editedAtomicData.status);
+
+    if (!statusResult.success) {
+      return statusResult;
+    }
+
+    const dueDateResult = atomicService.changeAtomicDueDate(
+      editedAtomicData.atomicId,
+      editedAtomicData.dueDate,
+    );
+
+    if (!dueDateResult.success) {
+      return dueDateResult;
+    }
+
+    return refreshDisplay();
   };
 
   const handleEditParentSubmit = (editedParentData) => {
@@ -167,19 +197,13 @@ const createToDoController = () => {
       return dueDateResult;
     }
 
-    const statusResult = parentService.changeParentStatus(
-      editedParentData.parentId,
-      editedParentData.status,
-    );
+    const statusResult = parentService.changeParentStatus(editedParentData.parentId, editedParentData.status);
 
     if (!statusResult.success) {
       return statusResult;
     }
 
-    const titleResult = parentService.changeParentTitle(
-      editedParentData.parentId,
-      editedParentData.title,
-    );
+    const titleResult = parentService.changeParentTitle(editedParentData.parentId, editedParentData.title);
 
     if (!titleResult.success) {
       return titleResult;
@@ -208,6 +232,26 @@ const createToDoController = () => {
 
   const handleSelectProject = (projectName) => {
     selectedProjectName = projectName;
+    return refreshDisplay();
+  };
+
+  const handleToggleAtomicStatus = (atomicStatusData) => {
+    const statusResult = atomicService.changeAtomicStatus(atomicStatusData.atomicId, atomicStatusData.status);
+
+    if (!statusResult.success) {
+      return statusResult;
+    }
+
+    return refreshDisplay();
+  };
+
+  const handleToggleParentStatus = (parentStatusData) => {
+    const statusResult = parentService.changeParentStatus(parentStatusData.parentId, parentStatusData.status);
+
+    if (!statusResult.success) {
+      return statusResult;
+    }
+
     return refreshDisplay();
   };
 

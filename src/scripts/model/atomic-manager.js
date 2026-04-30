@@ -173,13 +173,21 @@ const createAtomicManager = () => {
     return { success: true, parentId: targetAtomic.getParentId() };
   };
 
-  const changeAtomicStatus = (id) => {
+  const changeAtomicStatus = (id, newStatus) => {
     const cleanId = typeof id === "string" ? id.trim() : "";
+    const cleanStatus = typeof newStatus === "string" ? newStatus.trim().toLowerCase() : "";
 
     if (cleanId === "") {
       return {
         success: false,
         reason: `Invalid Atomic Id - Atomic id must be a nonblank string!`,
+      };
+    }
+
+    if (cleanStatus !== "complete" && cleanStatus !== "incomplete") {
+      return {
+        success: false,
+        reason: `Invalid Status - Status must be complete or incomplete!`,
       };
     }
 
@@ -192,13 +200,12 @@ const createAtomicManager = () => {
       };
     }
 
-    if (targetAtomic.getStatus() === "incomplete") {
-      targetAtomic.setStatus("complete");
-    } else {
-      targetAtomic.setStatus("incomplete");
-    }
+    targetAtomic.setStatus(cleanStatus);
 
-    return { success: true, status: targetAtomic.getStatus() };
+    return {
+      success: true,
+      status: targetAtomic.getStatus(),
+    };
   };
 
   const changeAtomicTask = (id, newTask) => {
