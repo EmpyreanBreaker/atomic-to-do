@@ -5,10 +5,16 @@
   gap: 3rem;
   padding: 1rem;
   font-weight: 600;
-  border-top: 3px solid #d8dee9;
-  border-bottom: 3px solid #d8dee9;
-  border-left: 3px dashed #d8dee9;
-  border-right: 3px dashed #d8dee9;
+  border-top: 3px solid #111a2e;
+  border-bottom: 3px solid #111a2e;
+  border-left: 3px dashed #111a2e;
+  border-right: 3px dashed #111a2e;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .sidebar__title {
